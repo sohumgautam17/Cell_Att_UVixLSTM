@@ -88,10 +88,13 @@ for i in tqdm(range(len(sorted_list_of_annotations)), desc = 'Processing'):
   assert Path(annot).stem == Path(img_path).stem ## you can print out Path(annot).stem to see what this operation is doing
   # essentially, it is getting the filename without the extension
   # we are checking if the filename is the same for both the annotation and the image
-  
+
+  # saving the output of our function to a dict
   image_annot_data_struct[Path(annot).stem] = he_to_binary_mask(Path(annot).stem)
 
 # Now we have a dictionary with the filename as the key and the value is a dictionary with the original image, binary mask and color mask
 np.save('image_annot_data_struct.npy', image_annot_data_struct)
+# way to load data
+data = np.load('./image_annot_data_struct.npy', allow_pickle = True).item()
 
 
