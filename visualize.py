@@ -33,10 +33,10 @@ def visualize_segmentation(images, masks, preds, num_images=3):
     plt.savefig('./test.png')
     plt.close()
 
-batch_size = 7
-images = torch.randn(batch_size, 3, 512, 512).to(device)  # Random images
-targets = torch.randint(0, 2, (batch_size, 512, 512)).to(device)  # Random ground truth masks
-outputs = model(images)  # Model predictions
+# batch_size = 7
+# images = torch.randn(batch_size, 3, 512, 512).to(device)  # Random images
+# targets = torch.randint(0, 2, (batch_size, 512, 512)).to(device)  # Random ground truth masks
+# outputs = model(images)  # Model predictions
 
-# Visualize the first 3 images, masks, and predictions
-visualize_segmentation(images.detach().cpu(), targets.detach().cpu(), outputs.detach().cpu(), num_images=3)
+# # Visualize the first 3 images, masks, and predictions
+# visualize_segmentation(images.detach().cpu(), targets.detach().cpu(), outputs.detach().cpu(), num_images=3)
