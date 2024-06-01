@@ -1,3 +1,6 @@
+import torch
+import matplotlib as plt
+
 def visualize_segmentation(images, masks, preds, num_images=3):
     
     images = images.cpu().numpy().transpose(0, 2, 3, 1)  # Convert to NHWC for visualization

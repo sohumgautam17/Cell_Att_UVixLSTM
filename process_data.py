@@ -1,4 +1,5 @@
 from matplotlib.patches import Polygon
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
@@ -18,8 +19,8 @@ import matplotlib.pyplot as plt
 import random
 
 # way to get the list of files in a directory without all the for loops
-list_of_annotations = glob.glob('./Annotations/*.xml')
-list_of_imgs = glob.glob('./Tissue Images/*.tif')
+list_of_annotations = glob.glob('./MoNuSeg_Annotations/*.xml')
+list_of_imgs = glob.glob('./MoNuSeg_Images/*.tif')
 print(len(list_of_annotations))
 print(len(list_of_imgs))
 assert len(list_of_annotations) == len(list_of_imgs)
@@ -31,8 +32,8 @@ sorted_list_of_imgs = sorted(list_of_imgs)
 
 
 def he_to_binary_mask(filename, visualize = False):
-    im_file = './Tissue Images/' + filename + '.tif'
-    xml_file = './Annotations/' + filename + '.xml'
+    im_file = './MoNuSeg_Images/' + filename + '.tif'
+    xml_file = './MoNuSeg_Annotations/' + filename + '.xml'
 
     # Parse XML
     tree = ET.parse(xml_file)
@@ -79,20 +80,39 @@ def he_to_binary_mask(filename, visualize = False):
     }
 
 image_annot_data_struct = {}
+#____________________________________________________________________________________________
 
-# Example usage:
-# to assert that the files are same. 
-for i in tqdm(range(len(sorted_list_of_annotations)), desc = 'Processing'):
-  annot = sorted_list_of_annotations[i]
-  img_path = sorted_list_of_imgs[i]
-  assert Path(annot).stem == Path(img_path).stem ## you can print out Path(annot).stem to see what this operation is doing
-  # essentially, it is getting the filename without the extension
-  # we are checking if the filename is the same for both the annotation and the image
+cyro_annotations = glob.glob('./Cryo_Annotater_1/*.png')
+cryo_images = glob.glob('./CryoNuSeg_Images/*.tif')
 
-  # saving the output of our function to a dict
-  image_annot_data_struct[Path(annot).stem] = he_to_binary_mask(Path(annot).stem)
+sorted_cryo_annotations = sorted(cyro_annotations)
+sorted_cryo_image = sorted(cryo_images)
 
-# Now we have a dictionary with the filename as the key and the value is a dictionary with the original image, binary mask and color mask
-np.save('image_annot_data_struct.npy', image_annot_data_struct)
-# way to load data
-data = np.load('./image_annot_data_struct.npy', allow_pickle = True).item()
+assert len(sorted_cryo_annotations) == len(sorted_cryo_image)
+
+def pdf_to_binary(image):
+    storing_list = []
+
+    # Load image
+    img = cv2.imread(image)
+    storing_list.append(img)
+
+    return storing_list
+
+
+# # Example usage:
+# # to assert that the files are same. 
+# for i in tqdm(range(len(sorted_list_of_annotations)), desc = 'Processing'):
+#   annot = sorted_list_of_annotations[i]
+#   img_path = sorted_list_of_imgs[i]
+#   assert Path(annot).stem == Path(img_path).stem ## you can print out Path(annot).stem to see what this operation is doing
+#   # essentially, it is getting the filename without the extension
+#   # we are checking if the filename is the same for both the annotation and the image
+
+#   # saving the output of our function to a dict
+#   image_annot_data_struct[Path(annot).stem] = he_to_binary_mask(Path(annot).stem)
+
+# # Now we have a dictionary with the filename as the key and the value is a dictionary with the original image, binary mask and color mask
+# np.save('image_annot_data_struct.npy', image_annot_data_struct)
+# # way to load data
+# data = np.load('./image_annot_data_struct.npy', allow_pickle = True).item()
