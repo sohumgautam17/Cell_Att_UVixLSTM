@@ -17,23 +17,23 @@ import numpy as np
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import random
+import torchvision.transforms as T
+
 
 # way to get the list of files in a directory without all the for loops
-list_of_annotations = glob.glob('./MoNuSeg_Annotations/*.xml')
-list_of_imgs = glob.glob('./MoNuSeg_Images/*.tif')
-print(len(list_of_annotations))
-print(len(list_of_imgs))
+list_of_annotations = glob.glob('./Data/MoNuSeg_Annotations/*.xml')
+list_of_imgs = glob.glob('./Data/MoNuSeg_Images/*.tif')
+# print(len(list_of_annotations))
+# print(len(list_of_imgs))
 assert len(list_of_annotations) == len(list_of_imgs)
 
 # sorting part
 sorted_list_of_annotations = sorted(list_of_annotations)
 sorted_list_of_imgs = sorted(list_of_imgs)
 
-
-
 def he_to_binary_mask(filename, visualize = False):
-    im_file = './MoNuSeg_Images/' + filename + '.tif'
-    xml_file = './MoNuSeg_Annotations/' + filename + '.xml'
+    im_file = './Data/MoNuSeg_Images/' + filename + '.tif'
+    xml_file = './Data/MoNuSeg_Annotations/' + filename + '.xml'
 
     # Parse XML
     tree = ET.parse(xml_file)
@@ -76,11 +76,36 @@ def he_to_binary_mask(filename, visualize = False):
     return {
         'original_image': np.array(image),
         'binary_mask': binary_mask,
-        'color_mask': color_mask
+        # 'color_mask': color_mask
     }
 
 image_annot_data_struct = {}
-#____________________________________________________________________________________________
+
+
+def load_monuseg():
+    files_path = "./Data/MoNuSeg_Images"
+    filenames = []
+    orig_binmask_colormask = []
+
+    for each_file in os.listdir(files_path):
+        each_file = each_file[:-4]
+        filenames.append(each_file)
+    
+    for i in filenames:
+        orig_binmask_colormask.append(he_to_binary_mask(i))
+
+    for data in orig_binmask_colormask:
+        first_key, first_value = next(iter(data.items()))
+        image_array = np.array(first_value)
+        img_flip_ud = cv2.flip(image_array, 0)
+        img_rotated = np.rot90(img_flip_ud, k=3)
+        data[first_key] = img_rotated
+
+    return orig_binmask_colormask
+
+
+
+###____________________________________________________________________________________________###
 
 cyro_annotations = glob.glob('./Cryo_Annotater_1/*.png')
 cryo_images = glob.glob('./CryoNuSeg_Images/*.tif')
@@ -100,19 +125,44 @@ def pdf_to_binary(image):
     return storing_list
 
 
-# # Example usage:
-# # to assert that the files are same. 
-# for i in tqdm(range(len(sorted_list_of_annotations)), desc = 'Processing'):
-#   annot = sorted_list_of_annotations[i]
-#   img_path = sorted_list_of_imgs[i]
-#   assert Path(annot).stem == Path(img_path).stem ## you can print out Path(annot).stem to see what this operation is doing
-#   # essentially, it is getting the filename without the extension
-#   # we are checking if the filename is the same for both the annotation and the image
 
-#   # saving the output of our function to a dict
-#   image_annot_data_struct[Path(annot).stem] = he_to_binary_mask(Path(annot).stem)
+def load_cryo():
+    image_path = './Data/CryoNuSeg_Images'
+    annotations_path = './Data/Cryo_Annotater_1'
 
-# # Now we have a dictionary with the filename as the key and the value is a dictionary with the original image, binary mask and color mask
-# np.save('image_annot_data_struct.npy', image_annot_data_struct)
-# # way to load data
-# data = np.load('./image_annot_data_struct.npy', allow_pickle = True).item()
+    image_array = []
+    annotation_array = []
+
+    # Get lists of image and annotation file paths
+    image_files = sorted(os.listdir(image_path))
+    annotation_files = sorted(os.listdir(annotations_path))
+
+    # Iterate over both lists simultaneousl using zip()
+    for image_file in image_files:
+        image_path_full = os.path.join(image_path, image_file)
+        image_numpy = pdf_to_binary(image_path_full)
+        image_array.append(np.squeeze(image_numpy))
+
+    for annotation_file in annotation_files:
+        annotation_path_full = os.path.join(annotations_path, annotation_file)
+        annotation_numpy = pdf_to_binary(annotation_path_full)
+        annotation_array.append(np.squeeze(annotation_numpy))
+
+    return image_array, annotation_array
+
+def resize_cryo(cryo_images, cryo_annotations):
+    resized_img_array = []
+    resized_mask_array = []
+
+    for image, mask in zip(cryo_images, cryo_annotations):
+        pil_image = Image.fromarray(image)
+        resized_img = T.Resize(size=(1000,1000))(pil_image)
+        resized_img = np.array(resized_img)
+        resized_img_array.append(resized_img)
+
+        pil_mask = Image.fromarray(mask).convert("L")
+        resized_mask = T.Resize(size=(1000, 1000), interpolation=Image.NEAREST)(pil_mask)
+        resized_mask = np.array(resized_mask)
+        resized_mask_array.append(resized_mask)
+
+    return resized_img_array, resized_mask_array
