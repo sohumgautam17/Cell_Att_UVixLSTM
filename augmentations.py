@@ -55,17 +55,17 @@ def apply_aug(image, mask):
     mask = np.array(mask)
     try:
         horiz_trans = HorizontalFlip()
-        vert_trans = VerticalFlip()
-        random_crop = RandomCrop()
-        brightness = Brightness()
+        # vert_trans = VerticalFlip()
+        # random_crop = RandomCrop()
+        # brightness = Brightness()
         # contrast = Contrast()
         # gaussian_noise = Gaussian_Noise()
 
 
         horiz_transformed = horiz_trans(image=image, mask=mask)
-        vert_transformed = vert_trans(image=image, mask=mask)
-        random_crop = random_crop(image=image, mask=mask)
-        brightness = brightness(image=image, mask=mask)
+        # vert_transformed = vert_trans(image=image, mask=mask)
+        # random_crop = random_crop(image=image, mask=mask)
+        # brightness = brightness(image=image, mask=mask)
         # contrast = contrast(image=image, mask=mask)
         # gaussian_noise = gaussian_noise(image=image, mask=mask)
 
@@ -74,14 +74,14 @@ def apply_aug(image, mask):
         transformed_image_1 = horiz_transformed["image"]
         transformed_mask_1 = horiz_transformed["mask"]
 
-        transformed_image_2 = vert_transformed["image"]
-        transformed_mask_2 = vert_transformed["mask"]
+        # transformed_image_2 = vert_transformed["image"]
+        # transformed_mask_2 = vert_transformed["mask"]
 
-        transformed_image_3 = random_crop["image"]
-        transformed_mask_3 = random_crop["mask"]
+        # transformed_image_3 = random_crop["image"]
+        # transformed_mask_3 = random_crop["mask"]
 
-        transformed_image_4 = brightness["image"]
-        transformed_mask_4 = brightness["mask"]
+        # transformed_image_4 = brightness["image"]
+        # transformed_mask_4 = brightness["mask"]
 
         # transformed_image_5 = contrast["image"]
         # transformed_mask_5 = contrast["mask"]
@@ -90,8 +90,8 @@ def apply_aug(image, mask):
         # transformed_mask_6 = gaussian_noise["mask"]
 
         return {
-            "images":{image, transformed_image_1, transformed_image_2, transformed_image_3, transformed_image_4},
-            "masks":{mask, transformed_mask_1, transformed_mask_2, transformed_mask_3, transformed_mask_4}
+            "images":{image, transformed_image_1},
+            "masks":{mask, transformed_mask_1}
 
         }
     
