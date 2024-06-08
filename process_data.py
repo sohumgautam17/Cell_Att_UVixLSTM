@@ -21,8 +21,8 @@ import torchvision.transforms as T
 
 
 # way to get the list of files in a directory without all the for loops
-list_of_annotations = glob.glob('./Data/MoNuSeg_Annotations/*.xml')
-list_of_imgs = glob.glob('./Data/MoNuSeg_Images/*.tif')
+list_of_annotations = glob.glob('./MoNuSeg_Annotations/*.xml')
+list_of_imgs = glob.glob('./MoNuSeg_Images/*.tif')
 # print(len(list_of_annotations))
 # print(len(list_of_imgs))
 assert len(list_of_annotations) == len(list_of_imgs)
@@ -32,8 +32,8 @@ sorted_list_of_annotations = sorted(list_of_annotations)
 sorted_list_of_imgs = sorted(list_of_imgs)
 
 def he_to_binary_mask(filename, visualize = False):
-    im_file = './Data/MoNuSeg_Images/' + filename + '.tif'
-    xml_file = './Data/MoNuSeg_Annotations/' + filename + '.xml'
+    im_file = './MoNuSeg_Images/' + filename + '.tif'
+    xml_file = './MoNuSeg_Annotations/' + filename + '.xml'
 
     # Parse XML
     tree = ET.parse(xml_file)
@@ -83,7 +83,7 @@ image_annot_data_struct = {}
 
 
 def load_monuseg():
-    files_path = "./Data/MoNuSeg_Images"
+    files_path = "./MoNuSeg_Images"
     filenames = []
     orig_binmask_colormask = []
 
@@ -127,8 +127,8 @@ def pdf_to_binary(image):
 
 
 def load_cryo():
-    image_path = './Data/CryoNuSeg_Images'
-    annotations_path = './Data/Cryo_Annotater_1'
+    image_path = './CryoNuSeg_Images'
+    annotations_path = './Cryo_Annotater_1'
 
     image_array = []
     annotation_array = []
