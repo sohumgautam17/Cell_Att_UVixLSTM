@@ -30,7 +30,7 @@ def RandomCrop():
 def Brightness():
     return A.Compose([
         A.Resize(1000,1000),
-        A.ColorJitter(brightness=(1,3), p=1.0)
+        A.ColorJitter(brightness=(0.8, 1.2), p=1.0)
     ])
 
 def Contrast():
