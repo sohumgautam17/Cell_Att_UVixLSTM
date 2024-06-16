@@ -166,3 +166,4 @@ def resize_cryo(cryo_images, cryo_annotations):
         resized_mask_array.append(resized_mask)
 
     return resized_img_array, resized_mask_array
+

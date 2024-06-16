@@ -1,0 +1,6 @@
+
+Number of Images Trained on: 6048 | # Epochs: 5 | LR: 0.05 | Number of Params: 31390721
+  0%|          | 0/5 [00:00<?, ?it/s]
+Epoch #0_______Batch #0...
+  0%|          | 0/5 [05:52<?, ?it/s]
+  0%|          | 0/5 [00:00<?, ?it/s]
