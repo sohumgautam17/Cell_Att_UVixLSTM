@@ -1,1 +1,0 @@
-{"batch_dice_loss": -0.31641876697540283, "batch_bce_loss": -48.29420471191406, "total_loss": -48.61062240600586, "_timestamp": 1718560697.336881, "_runtime": 138.45754289627075, "_step": 0, "_wandb": {"runtime": 352}}
