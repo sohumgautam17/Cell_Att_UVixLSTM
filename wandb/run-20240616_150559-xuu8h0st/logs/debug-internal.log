@@ -1,0 +1,53 @@
+2024-06-16 15:06:04,688 INFO    StreamThr :6331 [internal.py:wandb_internal():85] W&B internal server running at pid: 6331, started at: 2024-06-16 15:06:04.685412
+2024-06-16 15:06:04,690 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: status
+2024-06-16 15:06:04,691 INFO    WriterThread:6331 [datastore.py:open_for_write():87] open: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/run-xuu8h0st.wandb
+2024-06-16 15:06:04,694 DEBUG   SenderThread:6331 [sender.py:send():379] send: header
+2024-06-16 15:06:04,694 DEBUG   SenderThread:6331 [sender.py:send():379] send: run
+2024-06-16 15:06:04,922 INFO    SenderThread:6331 [dir_watcher.py:__init__():211] watching files in: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files
+2024-06-16 15:06:04,923 INFO    SenderThread:6331 [sender.py:_start_run_threads():1188] run started: xuu8h0st with start time 1718564763.874794
+2024-06-16 15:06:04,938 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: check_version
+2024-06-16 15:06:04,938 DEBUG   SenderThread:6331 [sender.py:send_request():406] send_request: check_version
+2024-06-16 15:06:05,038 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: run_start
+2024-06-16 15:06:05,039 DEBUG   HandlerThread:6331 [system_info.py:__init__():26] System info init
+2024-06-16 15:06:05,039 DEBUG   HandlerThread:6331 [system_info.py:__init__():41] System info init done
+2024-06-16 15:06:05,039 INFO    HandlerThread:6331 [system_monitor.py:start():194] Starting system monitor
+2024-06-16 15:06:05,039 INFO    SystemMonitor:6331 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-06-16 15:06:05,039 INFO    HandlerThread:6331 [system_monitor.py:probe():214] Collecting system info
+2024-06-16 15:06:05,039 INFO    SystemMonitor:6331 [interfaces.py:start():188] Started cpu monitoring
+2024-06-16 15:06:05,039 DEBUG   HandlerThread:6331 [system_info.py:probe():152] Probing system
+2024-06-16 15:06:05,039 INFO    SystemMonitor:6331 [interfaces.py:start():188] Started disk monitoring
+2024-06-16 15:06:05,041 INFO    SystemMonitor:6331 [interfaces.py:start():188] Started memory monitoring
+2024-06-16 15:06:05,041 INFO    SystemMonitor:6331 [interfaces.py:start():188] Started network monitoring
+2024-06-16 15:06:05,042 DEBUG   HandlerThread:6331 [system_info.py:_probe_git():137] Probing git
+2024-06-16 15:06:05,086 DEBUG   HandlerThread:6331 [system_info.py:_probe_git():145] Probing git done
+2024-06-16 15:06:05,086 DEBUG   HandlerThread:6331 [system_info.py:probe():200] Probing system done
+2024-06-16 15:06:05,086 DEBUG   HandlerThread:6331 [system_monitor.py:probe():223] {'os': 'macOS-10.16-x86_64-i386-64bit', 'python': '3.8.19', 'heartbeatAt': '2024-06-16T19:06:05.040813', 'startedAt': '2024-06-16T19:05:59.502124', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '<python with no main file>', 'codePathLocal': None, 'git': {'remote': 'https://github.com/sohumgautam17/CellDeit.git', 'commit': 'ce83cc284b2c4a0692bb20bd7b4924c73d6ed876'}, 'email': 'sohumgautam@icloud.com', 'root': '/Users/sohumgautam/Documents/CellDeit', 'host': 'Chetans-MBP-2', 'username': 'sohumgautam', 'executable': '/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/bin/python', 'cpu_count': 8, 'cpu_count_logical': 8, 'cpu_freq': {'current': 2400, 'min': 2400, 'max': 2400}, 'cpu_freq_per_core': [{'current': 2400, 'min': 2400, 'max': 2400}], 'disk': {'/': {'total': 1858.1917190551758, 'used': 613.7837715148926}}, 'memory': {'total': 16.0}}
+2024-06-16 15:06:05,086 INFO    HandlerThread:6331 [system_monitor.py:probe():224] Finished collecting system info
+2024-06-16 15:06:05,086 INFO    HandlerThread:6331 [system_monitor.py:probe():227] Publishing system info
+2024-06-16 15:06:05,086 DEBUG   HandlerThread:6331 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-06-16 15:06:05,927 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/conda-environment.yaml
+2024-06-16 15:06:07,781 DEBUG   HandlerThread:6331 [system_info.py:_save_conda():224] Saving conda packages done
+2024-06-16 15:06:07,782 INFO    HandlerThread:6331 [system_monitor.py:probe():229] Finished publishing system info
+2024-06-16 15:06:07,783 DEBUG   SenderThread:6331 [sender.py:send():379] send: files
+2024-06-16 15:06:07,783 INFO    SenderThread:6331 [sender.py:_save_file():1454] saving file wandb-metadata.json with policy now
+2024-06-16 15:06:07,869 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: python_packages
+2024-06-16 15:06:07,869 DEBUG   SenderThread:6331 [sender.py:send_request():406] send_request: python_packages
+2024-06-16 15:06:07,872 DEBUG   SenderThread:6331 [sender.py:send():379] send: telemetry
+2024-06-16 15:06:07,875 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:07,875 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: stop_status
+2024-06-16 15:06:07,875 DEBUG   SenderThread:6331 [sender.py:send_request():406] send_request: stop_status
+2024-06-16 15:06:07,933 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/conda-environment.yaml
+2024-06-16 15:06:07,933 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/requirements.txt
+2024-06-16 15:06:07,933 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/output.log
+2024-06-16 15:06:07,933 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/wandb-metadata.json
+2024-06-16 15:06:08,091 INFO    wandb-upload_0:6331 [upload_job.py:push():130] Uploaded file /var/folders/1g/hq1rbb_x5fvg99nn8gp1j5lc0000gq/T/tmpyuvta4inwandb/u6b4o1h2-wandb-metadata.json
+2024-06-16 15:06:08,875 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:09,878 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:09,944 INFO    Thread-24 :6331 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_150559-xuu8h0st/files/output.log
+2024-06-16 15:06:10,002 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: status_report
+2024-06-16 15:06:10,882 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:11,884 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:12,889 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:13,891 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:14,895 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 15:06:15,172 DEBUG   HandlerThread:6331 [handler.py:handle_request():158] handle_request: status_report

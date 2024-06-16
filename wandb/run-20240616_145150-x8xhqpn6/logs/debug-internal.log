@@ -1,0 +1,72 @@
+2024-06-16 14:51:57,065 INFO    StreamThr :5971 [internal.py:wandb_internal():85] W&B internal server running at pid: 5971, started at: 2024-06-16 14:51:57.061750
+2024-06-16 14:51:57,067 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: status
+2024-06-16 14:51:57,069 INFO    WriterThread:5971 [datastore.py:open_for_write():87] open: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/run-x8xhqpn6.wandb
+2024-06-16 14:51:57,071 DEBUG   SenderThread:5971 [sender.py:send():379] send: header
+2024-06-16 14:51:57,071 DEBUG   SenderThread:5971 [sender.py:send():379] send: run
+2024-06-16 14:51:57,333 INFO    SenderThread:5971 [dir_watcher.py:__init__():211] watching files in: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files
+2024-06-16 14:51:57,333 INFO    SenderThread:5971 [sender.py:_start_run_threads():1188] run started: x8xhqpn6 with start time 1718563916.246224
+2024-06-16 14:51:57,339 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: check_version
+2024-06-16 14:51:57,341 DEBUG   SenderThread:5971 [sender.py:send_request():406] send_request: check_version
+2024-06-16 14:51:57,446 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: run_start
+2024-06-16 14:51:57,447 DEBUG   HandlerThread:5971 [system_info.py:__init__():26] System info init
+2024-06-16 14:51:57,448 DEBUG   HandlerThread:5971 [system_info.py:__init__():41] System info init done
+2024-06-16 14:51:57,448 INFO    HandlerThread:5971 [system_monitor.py:start():194] Starting system monitor
+2024-06-16 14:51:57,448 INFO    SystemMonitor:5971 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-06-16 14:51:57,448 INFO    HandlerThread:5971 [system_monitor.py:probe():214] Collecting system info
+2024-06-16 14:51:57,448 INFO    SystemMonitor:5971 [interfaces.py:start():188] Started cpu monitoring
+2024-06-16 14:51:57,448 DEBUG   HandlerThread:5971 [system_info.py:probe():152] Probing system
+2024-06-16 14:51:57,449 INFO    SystemMonitor:5971 [interfaces.py:start():188] Started disk monitoring
+2024-06-16 14:51:57,450 INFO    SystemMonitor:5971 [interfaces.py:start():188] Started memory monitoring
+2024-06-16 14:51:57,450 INFO    SystemMonitor:5971 [interfaces.py:start():188] Started network monitoring
+2024-06-16 14:51:57,451 DEBUG   HandlerThread:5971 [system_info.py:_probe_git():137] Probing git
+2024-06-16 14:51:57,496 DEBUG   HandlerThread:5971 [system_info.py:_probe_git():145] Probing git done
+2024-06-16 14:51:57,496 DEBUG   HandlerThread:5971 [system_info.py:probe():200] Probing system done
+2024-06-16 14:51:57,496 DEBUG   HandlerThread:5971 [system_monitor.py:probe():223] {'os': 'macOS-10.16-x86_64-i386-64bit', 'python': '3.8.19', 'heartbeatAt': '2024-06-16T18:51:57.449005', 'startedAt': '2024-06-16T18:51:50.782452', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '<python with no main file>', 'codePathLocal': None, 'git': {'remote': 'https://github.com/sohumgautam17/CellDeit.git', 'commit': 'ce83cc284b2c4a0692bb20bd7b4924c73d6ed876'}, 'email': 'sohumgautam@icloud.com', 'root': '/Users/sohumgautam/Documents/CellDeit', 'host': 'Chetans-MBP-2', 'username': 'sohumgautam', 'executable': '/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/bin/python', 'cpu_count': 8, 'cpu_count_logical': 8, 'cpu_freq': {'current': 2400, 'min': 2400, 'max': 2400}, 'cpu_freq_per_core': [{'current': 2400, 'min': 2400, 'max': 2400}], 'disk': {'/': {'total': 1858.1917190551758, 'used': 610.7743988037109}}, 'memory': {'total': 16.0}}
+2024-06-16 14:51:57,496 INFO    HandlerThread:5971 [system_monitor.py:probe():224] Finished collecting system info
+2024-06-16 14:51:57,496 INFO    HandlerThread:5971 [system_monitor.py:probe():227] Publishing system info
+2024-06-16 14:51:57,496 DEBUG   HandlerThread:5971 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-06-16 14:51:58,332 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/conda-environment.yaml
+2024-06-16 14:52:00,127 DEBUG   HandlerThread:5971 [system_info.py:_save_conda():224] Saving conda packages done
+2024-06-16 14:52:00,128 INFO    HandlerThread:5971 [system_monitor.py:probe():229] Finished publishing system info
+2024-06-16 14:52:00,128 DEBUG   SenderThread:5971 [sender.py:send():379] send: files
+2024-06-16 14:52:00,128 INFO    SenderThread:5971 [sender.py:_save_file():1454] saving file wandb-metadata.json with policy now
+2024-06-16 14:52:00,216 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: python_packages
+2024-06-16 14:52:00,216 DEBUG   SenderThread:5971 [sender.py:send_request():406] send_request: python_packages
+2024-06-16 14:52:00,217 DEBUG   SenderThread:5971 [sender.py:send():379] send: telemetry
+2024-06-16 14:52:00,246 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: stop_status
+2024-06-16 14:52:00,246 DEBUG   SenderThread:5971 [sender.py:send_request():406] send_request: stop_status
+2024-06-16 14:52:00,251 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:00,342 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/conda-environment.yaml
+2024-06-16 14:52:00,342 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/wandb-metadata.json
+2024-06-16 14:52:00,342 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/requirements.txt
+2024-06-16 14:52:00,460 INFO    wandb-upload_0:5971 [upload_job.py:push():130] Uploaded file /var/folders/1g/hq1rbb_x5fvg99nn8gp1j5lc0000gq/T/tmpin8ar1skwandb/78b3j52w-wandb-metadata.json
+2024-06-16 14:52:01,222 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:01,344 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/output.log
+2024-06-16 14:52:02,227 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:02,390 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: status_report
+2024-06-16 14:52:03,231 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:03,355 INFO    Thread-24 :5971 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/sohumgautam/Documents/CellDeit/wandb/run-20240616_145150-x8xhqpn6/files/output.log
+2024-06-16 14:52:04,237 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:05,241 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:06,243 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:07,247 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:08,232 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: status_report
+2024-06-16 14:52:08,250 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:09,253 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:10,258 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:11,260 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:12,266 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:13,236 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: status_report
+2024-06-16 14:52:13,270 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:14,275 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:15,223 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: stop_status
+2024-06-16 14:52:15,224 DEBUG   SenderThread:5971 [sender.py:send_request():406] send_request: stop_status
+2024-06-16 14:52:15,280 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:16,285 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:17,287 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:18,290 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:18,409 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: status_report
+2024-06-16 14:52:19,296 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:20,300 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:21,302 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages
+2024-06-16 14:52:22,308 DEBUG   HandlerThread:5971 [handler.py:handle_request():158] handle_request: internal_messages

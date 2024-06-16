@@ -1,0 +1,39 @@
+
+Unexpected exception formatting exception. Falling back to standard exception
+Traceback (most recent call last):
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/interactiveshell.py", line 3508, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "/var/folders/1g/hq1rbb_x5fvg99nn8gp1j5lc0000gq/T/ipykernel_5958/2876388364.py", line 1, in <module>
+    train(model_0, X_train, EPOCHS, learning_rate, num_params, BATCH_SIZE, train_loader, DICE_loss, BCE_loss, optimizer)
+  File "/Users/sohumgautam/Documents/CellDeit/train.py", line 20, in train
+NameError: name 'tqdm' is not defined
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/interactiveshell.py", line 2105, in showtraceback
+    stb = self.InteractiveTB.structured_traceback(
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 1396, in structured_traceback
+    return FormattedTB.structured_traceback(
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 1287, in structured_traceback
+    return VerboseTB.structured_traceback(
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 1140, in structured_traceback
+    formatted_exception = self.format_exception_as_a_whole(etype, evalue, etb, number_of_lines_of_context,
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 1055, in format_exception_as_a_whole
+    frames.append(self.format_record(record))
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 955, in format_record
+    frame_info.lines, Colors, self.has_colors, lvals
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/IPython/core/ultratb.py", line 778, in lines
+    return self._sd.lines
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/utils.py", line 144, in cached_property_wrapper
+    value = obj.__dict__[self.func.__name__] = self.func(obj)
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/core.py", line 734, in lines
+    pieces = self.included_pieces
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/utils.py", line 144, in cached_property_wrapper
+    value = obj.__dict__[self.func.__name__] = self.func(obj)
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/core.py", line 681, in included_pieces
+    pos = scope_pieces.index(self.executing_piece)
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/utils.py", line 144, in cached_property_wrapper
+    value = obj.__dict__[self.func.__name__] = self.func(obj)
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/stack_data/core.py", line 660, in executing_piece
+    return only(
+  File "/Users/sohumgautam/opt/miniconda3/envs/cmu_sohum_env/lib/python3.8/site-packages/executing/executing.py", line 116, in only
+    raise NotOneValueFound('Expected one value, found 0')
