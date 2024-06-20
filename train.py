@@ -84,3 +84,6 @@ def test(model, test_loader, DICE_loss, BCE_loss):
     avg_bce_loss = total_bce_loss / len(test_loader)
 
     return print(f'DICEL: {avg_dice_loss}, BCEL: {avg_bce_loss}')
+
+
+dummy = torch.randn(32, 250, 250, 3)
