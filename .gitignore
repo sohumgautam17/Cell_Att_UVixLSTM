@@ -1,0 +1,12 @@
+# Byte-Compiled / optimized / DLL files
+__pycache__/
+
+
+wandb_config.yaml
+wandb_configs/
+
+
+# Distributions
+.Python/
+build/
+downloads/

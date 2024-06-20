@@ -69,6 +69,7 @@ def test(model, test_loader, DICE_loss, BCE_loss):
 
     with torch.no_grad():
         for image, annote in test_loader:
+            image = image.permute(0, 3, 1, 2)
             test_logits = model(image)
             annote = annote.unsqueeze(1)  # Ensure the annotation shape matches the logits shape if needed
 
