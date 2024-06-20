@@ -5,6 +5,9 @@ __pycache__/
 wandb_config.yaml
 wandb_configs/
 
+# Weights
+fully_trained_seg_unet1.pth
+
 
 # Distributions
 .Python/
