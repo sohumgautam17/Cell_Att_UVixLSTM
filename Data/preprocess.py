@@ -48,32 +48,18 @@ def main(args):
     data = {
         "original_image": all_imgs,
         "mask": all_masks,
-        'horiz_images': [],
-        'horiz_masks': [],
-        'vert_images': [],
-        'vert_masks': [],
-        'crop_images': [],
-        'crop_masks': [],
-        'bright_images': [],
-        'bright_masks': [],
-        'cont_images': [],
-        'cont_masks': [],
-        'gauss_images': [],
-        'gauss_masks': [],
+        'aug_images': [],
+        'aug_masks': [],
         'patched_orig_images': [],
         'patched_orig_masks': [],
-        'patched_horiz_images': [],
-        'patched_horiz_masks': [],
-        'patched_vert_images': [],
-        'patched_vert_masks': [],
-        'patched_crop_images': [],
-        'patched_crop_masks': [],
-        'patched_bright_images': [],
-        'patched_bright_masks': [],
-        'patched_cont_images': [],
-        'patched_cont_masks': [],
-        'patched_gauss_images': [],
-        'patched_gauss_masks': []
+        'patched_aug_images': [],
+        'patched_aug_masks': [],
+        'train_patched_images': [],
+        'train_patched_masks': [],
+        'val_patched_images': [],
+        'val_patched_masks': [],
+        'test_patched_images': [],
+        'test_patched_masks': []
     }
 
     for i in tqdm(range(len(all_imgs)), desc = 'Augmenting and Patching Data'):
@@ -103,18 +89,18 @@ def main(args):
         gauss_image = gauss["image"]
         gauss_mask = gauss["mask"]
 
-        data['horiz_images'].append(horiz_image)
-        data['horiz_masks'].append(horiz_mask)
-        data['vert_images'].append(vert_image)
-        data['vert_masks'].append(vert_mask)
-        data['crop_images'].append(crop_image)
-        data['crop_masks'].append(crop_mask)
-        data['bright_images'].append(bright_image)
-        data['bright_masks'].append(bright_mask)
-        data['cont_images'].append(cont_image)
-        data['cont_masks'].append(cont_mask)
-        data['gauss_images'].append(gauss_image)
-        data['gauss_masks'].append(gauss_mask)
+        data['aug_images'].append(horiz_image)
+        data['aug_masks'].append(horiz_mask)
+        data['aug_images'].append(vert_image)
+        data['aug_masks'].append(vert_mask)
+        data['aug_images'].append(crop_image)
+        data['aug_masks'].append(crop_mask)
+        data['aug_images'].append(bright_image)
+        data['aug_masks'].append(bright_mask)
+        data['aug_images'].append(cont_image)
+        data['aug_masks'].append(cont_mask)
+        data['aug_images'].append(gauss_image)
+        data['aug_masks'].append(gauss_mask)
 
         orig_patches = split_image_into_patches(orig_image)
         orig_mask_patches = split_mask_into_patches(orig_mask)
@@ -134,19 +120,38 @@ def main(args):
         for j in range(len(orig_patches)):
             data['patched_orig_images'].append(orig_patches[j])
             data['patched_orig_masks'].append(orig_mask_patches[j])
-            data['patched_horiz_images'].append(horiz_patches[j])
-            data['patched_horiz_masks'].append(horiz_mask_patches[j])
-            data['patched_vert_images'].append(vert_patches[j])
-            data['patched_vert_masks'].append(vert_mask_patches[j])
-            data['patched_crop_images'].append(crop_patches[j])
-            data['patched_crop_masks'].append(crop_mask_patches[j])
-            data['patched_bright_images'].append(bright_patches[j])
-            data['patched_bright_masks'].append(bright_mask_patches[j])
-            data['patched_cont_images'].append(cont_patches[j])
-            data['patched_cont_masks'].append(cont_mask_patches[j])
-            data['patched_gauss_images'].append(gauss_patches[j])
-            data['patched_gauss_masks'].append(gauss_mask_patches[j])
+            data['patched_aug_images'].append(horiz_patches[j])
+            data['patched_aug_masks'].append(horiz_mask_patches[j])
+            data['patched_aug_images'].append(vert_patches[j])
+            data['patched_aug_masks'].append(vert_mask_patches[j])
+            data['patched_aug_images'].append(crop_patches[j])
+            data['patched_aug_masks'].append(crop_mask_patches[j])
+            data['patched_aug_images'].append(bright_patches[j])
+            data['patched_aug_masks'].append(bright_mask_patches[j])
+            data['patched_aug_images'].append(cont_patches[j])
+            data['patched_aug_masks'].append(cont_mask_patches[j])
+            data['patched_aug_images'].append(gauss_patches[j])
+            data['patched_aug_masks'].append(gauss_mask_patches[j])
     
+    for i in range(len(data['patched_orig_images'])):
+        if i < 0.4*len(data['patched_orig_images']):
+            data['train_patched_images'].append(data['patched_orig_images'][i])
+            data['train_patched_masks'].append(data['patched_orig_masks'][i])
+        elif i < 0.5*len(data['patched_orig_images']):
+            data['val_patched_images'].append(data['patched_orig_images'][i])
+            data['val_patched_masks'].append(data['patched_orig_masks'][i])
+        else:
+            data['test_patched_images'].append(data['patched_orig_images'][i])
+            data['test_patched_masks'].append(data['patched_orig_masks'][i])
+    
+    for i in range(len(data['patched_aug_images'])):
+        if i < 0.8*len(data['patched_aug_images']):
+            data['train_patched_images'].append(data['patched_aug_images'][i])
+            data['train_patched_masks'].append(data['patched_aug_masks'][i])
+        else:
+            data['val_patched_images'].append(data['patched_aug_images'][i])
+            data['val_patched_masks'].append(data['patched_aug_masks'][i])
+        
     np.save('./all_data.npy', data)
 
 
