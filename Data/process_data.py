@@ -32,8 +32,8 @@ sorted_list_of_annotations = sorted(list_of_annotations)
 sorted_list_of_imgs = sorted(list_of_imgs)
 
 def he_to_binary_mask(filename, visualize = False):
-    im_file = './MoNuSeg_Images/' + filename + '.tif'
-    xml_file = './MoNuSeg_Annotations/' + filename + '.xml'
+    im_file = '../MoNuSeg_Images/' + filename + '.tif'
+    xml_file = '../MoNuSeg_Annotations/' + filename + '.xml'
 
     # Parse XML
     tree = ET.parse(xml_file)
@@ -59,12 +59,12 @@ def he_to_binary_mask(filename, visualize = False):
 
     for i, coords in enumerate(xy):
         rr, cc = polygon2mask((nrow, ncol), coords).nonzero()
-        binary_mask[rr, cc] += 1  # Update binary mask
+        binary_mask[rr, cc] += 255  # Update binary mask
 
-        # Update color mask with random colors
-        color = [random.randint(0, 255) for _ in range(3)]
-        for j in range(3):
-            color_mask[rr, cc, j] = np.clip(color_mask[rr, cc, j] + color[j], 0, 255)
+        # Update color mask with random colors (If we do not use we can comment)
+        # color = [random.randint(0, 255) for _ in range(3)]
+        # for j in range(3):
+        #     color_mask[rr, cc, j] = np.clip(color_mask[rr, cc, j] + color[j], 0, 255)
 
     # visualize masks
     if visualize:
@@ -83,25 +83,21 @@ image_annot_data_struct = {}
 
 
 def load_monuseg():
-    files_path = "./MoNuSeg_Images"
-    filenames = []
-    orig_binmask_colormask = []
+    files_path = "../MoNuSeg_Images"
+    # filenames = []
+    imgs = []
+    binary_masks = []
 
-    for each_file in os.listdir(files_path):
+    for each_file in tqdm(os.listdir(files_path), desc='Loading MoNuSeg Images'):
         each_file = each_file[:-4]
-        filenames.append(each_file)
-    
-    for i in filenames:
-        orig_binmask_colormask.append(he_to_binary_mask(i))
-
-    for data in orig_binmask_colormask:
-        first_key, first_value = next(iter(data.items()))
-        image_array = np.array(first_value)
+        data = he_to_binary_mask(each_file)
+        image_array = np.array(data['original_image'])
         img_flip_ud = cv2.flip(image_array, 0)
         img_rotated = np.rot90(img_flip_ud, k=3)
-        data[first_key] = img_rotated
+        imgs.append(img_rotated)
+        binary_masks.append(data['binary_mask'])
 
-    return orig_binmask_colormask
+    return imgs, binary_masks
 
 
 
@@ -127,8 +123,8 @@ def pdf_to_binary(image):
 
 
 def load_cryo():
-    image_path = './CryoNuSeg_Images'
-    annotations_path = './Cryo_Annotater_1'
+    image_path = '../CryoNuSeg_Images'
+    annotations_path = '../Cryo_Annotater_1'
 
     image_array = []
     annotation_array = []
@@ -154,7 +150,7 @@ def resize_cryo(cryo_images, cryo_annotations):
     resized_img_array = []
     resized_mask_array = []
 
-    for image, mask in zip(cryo_images, cryo_annotations):
+    for image, mask in tqdm(zip(cryo_images, cryo_annotations), desc = 'Loading Cryo Images') :
         pil_image = Image.fromarray(image)
         resized_img = T.Resize(size=(1000,1000))(pil_image)
         resized_img = np.array(resized_img)
@@ -166,4 +162,3 @@ def resize_cryo(cryo_images, cryo_annotations):
         resized_mask_array.append(resized_mask)
 
     return resized_img_array, resized_mask_array
-

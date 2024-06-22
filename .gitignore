@@ -9,6 +9,12 @@ wandb_configs/
 # Weights
 fully_trained_seg_unet1.pth
 
+#Data
+Cryo_Annotater_1
+CryoNuSeg_Images
+
+MoNuSeg_Annotations
+MoNuSeg_Images
 
 # Distributions
 .Python/

@@ -52,20 +52,21 @@ def Gaussian_Noise():
 
 
 def apply_aug(image, mask):
-    # Ensure image and mask are converted to uint8 and maintain dimensions
-    if image.ndim == 2:
-        image = np.expand_dims(image, axis=-1)
-    if mask.ndim == 2:
-        mask = np.expand_dims(mask, axis=-1)
+    # # Ensure image and mask are converted to uint8 and maintain dimensions
+    # if image.ndim == 2:
+    #     image = np.expand_dims(image, axis=-1)
+    # if mask.ndim == 2:
+    #     mask = np.expand_dims(mask, axis=-1)
 
-    # Ensure image has 3 channels and mask has 1 channel
-    if image.shape[-1] == 1:
-        image = np.repeat(image, 3, axis=-1)
-    if mask.shape[-1] == 1:
-        mask = mask[..., 0]
+    # # Ensure image has 3 channels and mask has 1 channel
+    # if image.shape[-1] == 1:
+    #     image = np.repeat(image, 3, axis=-1)
+    # if mask.shape[-1] == 1:
+    #     mask = mask[..., 0]
 
     image = np.array(image).astype(np.uint8)
     mask = np.array(mask).astype(np.uint8)
+    
     try:
         horiz_trans = HorizontalFlip()
         vert_trans = VerticalFlip()
@@ -113,5 +114,3 @@ def apply_aug(image, mask):
     except Exception as e:
         print("Error:", e)
         raise
-
-
