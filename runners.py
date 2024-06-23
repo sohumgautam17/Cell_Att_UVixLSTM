@@ -5,6 +5,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 
+## Functionized Training, Val, and Test Loops
 
 def trainer(model, train_loader, optimizer, device, args, loss):
     model.train()
@@ -70,7 +71,8 @@ def iou(pred, target, smooth=1e-6):
 
 
 def visualize(img, mask, output, args, inst):
-    img = img.squeeze().cpu().numpy().transpose(1, 2, 0)
+    # Change to visualizable shape (h w c) not (c h w)
+    img = img.squeeze().cpu().numpy().transpose(1, 2, 0) 
     mask = mask.squeeze().cpu().numpy()
     output = output.squeeze().cpu().numpy()
     

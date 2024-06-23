@@ -31,8 +31,9 @@ class ScheduledOptim():
         for param_group in self._optimizer.param_groups:
             param_group['lr'] = lr
             
-            
+# Stop training if validtion loss has not improved after 5 epochs (Prevent Overfit)
 def early_stopping(validation_losses, patience=5, delta=0):
+    # Do not stop if not enough val_losses have passes  
     if len(validation_losses) < patience + 1:
         return False
     

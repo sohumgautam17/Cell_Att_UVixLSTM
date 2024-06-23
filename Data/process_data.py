@@ -70,8 +70,8 @@ def he_to_binary_mask(filename, visualize = False):
     if visualize:
         plt.imsave('./visualized_imgs/' + filename + '_binary.png', binary_mask, cmap='gray')
         plt.close()
-        plt.imsave('./visualized_imgs/' + filename + '_color.png', color_mask)
-        plt.close()
+        # plt.imsave('./visualized_imgs/' + filename + '_color.png', color_mask)
+        # plt.close()
 
     return {
         'original_image': np.array(image),
@@ -79,7 +79,7 @@ def he_to_binary_mask(filename, visualize = False):
         # 'color_mask': color_mask
     }
 
-image_annot_data_struct = {}
+# image_annot_data_struct = {}
 
 
 def load_monuseg():
