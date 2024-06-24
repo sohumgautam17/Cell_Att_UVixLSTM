@@ -18,3 +18,4 @@ https://www.kaggle.com/datasets/ipateam/segmentation-of-nuclei-in-cryosectioned-
   Total Annotations: 30,000
 
 Example Task 
+![visualization_9](https://github.com/sohumgautam17/celldeit/assets/69330896/f41bf229-2577-4e72-8654-0d1d8c01079b)
