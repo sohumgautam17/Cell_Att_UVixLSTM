@@ -17,5 +17,5 @@ https://www.kaggle.com/datasets/ipateam/segmentation-of-nuclei-in-cryosectioned-
 2) Annotater 1 Annotations - Mask Binary - Type *png
   Total Annotations: 30,000
 
-Example Task 
+Example Task (Low accuracy prediction pro tem)
 ![visualization_9](https://github.com/sohumgautam17/celldeit/assets/69330896/f41bf229-2577-4e72-8654-0d1d8c01079b)
