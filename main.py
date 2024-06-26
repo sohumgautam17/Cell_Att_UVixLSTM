@@ -27,14 +27,14 @@ def get_args():
     parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
     parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
     parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
-
+    parser.add_argument('--patch_size', type=int, default=500, desc='please enter patch size')
     parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
-    # Can change this to "parser.add_argument('--loss', type = str, choices = ['dice', 'bce'], help = 'Please choose which loss to use')"
-
     parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
     parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
     parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
     parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
+    parser.add_argument('--augfly', action='store_false', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
+
     return parser.parse_args()
 
 def ensure_directory_exists(directory_path):
@@ -157,4 +157,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = get_args()
+    print("Preprocessing data")
+    print('#'*50)
     main(args)

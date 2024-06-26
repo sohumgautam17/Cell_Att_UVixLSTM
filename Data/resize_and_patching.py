@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
+import argparse
 
 
 # Given tensor
@@ -24,7 +25,10 @@ import numpy as np
 
 
 
-def split_image_into_patches(image, patch_size=250):
+# replace with 
+# def split_image_into_patches(image, patch_size=args.patch_size):
+
+def split_image_into_patches(image, patch_size: int):
     
     # Check if the image dimensions are divisible by the patch size
     assert image.shape[0] % patch_size == 0, "Image height must be divisible by the patch size"
@@ -54,7 +58,7 @@ def split_image_into_patches(image, patch_size=250):
 # patches = split_image_into_patches(large_image, patch_size=250)
 
 
-def split_mask_into_patches(mask, patch_size = 250):
+def split_mask_into_patches(mask, patch_size: int):
     assert mask.shape[0] % patch_size == 0 
     assert mask.shape[1] % patch_size == 0
 
@@ -71,3 +75,4 @@ def split_mask_into_patches(mask, patch_size = 250):
 
     mask_patches = np.stack(mask_patches, axis=0)
     return mask_patches
+

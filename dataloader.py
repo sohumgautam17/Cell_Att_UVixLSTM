@@ -11,10 +11,25 @@ class CellDataset(Dataset):
         self.imgs = imgs
         self.masks = masks
         self.args = args
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        # Random batch trasforms
+        if args.augfly:
+            self.transform = transforms.Compose([
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.RandomCrop(p=0.5),
+                transforms.ColorJitter(brightness=(0.5, 0.95), p=0.5),
+                transforms.ColorJitter(contrast=(0.5, 0.95), p=0.5),
+                transforms.ColorJitter(saturation=(0.5, 0.95), p=0.5),
+                transforms.Resize(args.patch_size),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        else:
+            self.transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        
         self.mask_transform = transforms.ToTensor()
         
     # Return number of samples in the dataset

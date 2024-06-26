@@ -2,7 +2,7 @@
 __pycache__
 __pycache__/
 
-
+# Mac specific 
 .DS_Store
 
 
@@ -13,11 +13,15 @@ wandb_configs/
 fully_trained_seg_unet1.pth
 
 #Data
-Cryo_Annotater_1
-CryoNuSeg_Images
+Cryo_Annotater_1/
+CryoNuSeg_Images/
 
-MoNuSeg_Annotations
-MoNuSeg_Images
+MoNuSeg_Annotations/
+MoNuSeg_Images/
+
+*.tif
+*.png
+*.xml
 
 # Distributions
 .Python/
