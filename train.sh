@@ -43,9 +43,8 @@ do
             do
 
             echo "Running with augmentatation on the fly=$aug_fly, patch_size=$patch_size, batch_size=$batch_size, learning rate=$lr"
-            python main_vqvae.py 
+            python main.py --device=cuda:0 
 
-            #--device=cuda:0 --epochs=150 --dataset=mit --in_channels=1 --out_channels=1 --batch_size=$batch_size --num_embeddings=$num --log --seed=$seed
         done
     done
 done
