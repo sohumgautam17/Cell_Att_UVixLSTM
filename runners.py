@@ -98,7 +98,7 @@ def tester(model, test_loader, device, args):
             output = model(img)
             
             output = torch.sigmoid(output)  # Assuming sigmoid for binary classification
-            output = (output > 0.5).float()
+            output = (output > 0.5).float() # True is > 0.5 else false -> True -> 1.0 False -> 0.0
 
             dice = dice_coefficient(output, mask)
             iou_score = iou(output, mask)

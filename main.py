@@ -12,6 +12,9 @@ from segmentation_models_pytorch.losses import DiceLoss
 import wandb
 
 from models.models import UNet
+
+from postprocess.watershed import inference_watershed
+
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
 from dataloader import CellDataset
@@ -96,6 +99,11 @@ def main(args):
         checkpoint = torch.load(f'./runs/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
         model.load_state_dict(checkpoint['model'])
         tester(model, test_loader, device, args)
+        inference_watershed(model, test_loader, device, args)
+
+
+        # This is where Watershed is run
+
     else:
         # Continue in Dev Mode
         optimizer = ScheduledOptim(
