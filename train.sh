@@ -43,7 +43,8 @@ do
             do
 
             echo "Running with augmentatation on the fly=$aug_fly, patch_size=$patch_size, batch_size=$batch_size, learning rate=$lr"
-            python main.py --device=cuda:0 
+            python main.py --device=cuda:0 --patch_size=$patch_size --batch_size=$batch_size, lr=$lr --augfly
+            python main.py --device=cuda:0 --patch_size=$patch_size --batch_size=$batch_size, lr=$lr
 
         done
     done
