@@ -37,7 +37,7 @@ class CellDataset(Dataset):
     def __getitem__(self, index):
         img = self.imgs[index]
         mask = self.masks[index]
-        img = self.transform(Image.fromarray(img))
+        trans_img = self.transform(Image.fromarray(img))
         mask = self.mask_transform(mask)
         
-        return img, mask
+        return trans_img, mask, img
