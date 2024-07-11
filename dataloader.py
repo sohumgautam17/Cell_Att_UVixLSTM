@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 from torchvision import transforms
-
+from PIL import Image
 
 # Create custom PyTorch for files 
 class CellDataset(Dataset):
@@ -16,11 +16,8 @@ class CellDataset(Dataset):
             self.transform = transforms.Compose([
                 transforms.RandomHorizontalFlip(p=0.5),
                 transforms.RandomVerticalFlip(p=0.5),
-                transforms.RandomCrop(p=0.5),
-                transforms.ColorJitter(brightness=(0.5, 0.95), p=0.5),
-                transforms.ColorJitter(contrast=(0.5, 0.95), p=0.5),
-                transforms.ColorJitter(saturation=(0.5, 0.95), p=0.5),
-                transforms.Resize(args.patch_size),
+                transforms.RandomResizedCrop(size=(args.patch_size, args.patch_size)),
+                transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
@@ -40,7 +37,7 @@ class CellDataset(Dataset):
     def __getitem__(self, index):
         img = self.imgs[index]
         mask = self.masks[index]
-        img = self.transform(img)
+        img = self.transform(Image.fromarray(img))
         mask = self.mask_transform(mask)
         
         return img, mask
