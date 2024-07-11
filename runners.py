@@ -14,7 +14,7 @@ def trainer(model, train_loader, optimizer, device, args, loss):
     
     for batch in tqdm(train_loader, desc = 'Training'):
         optimizer.zero_grad()
-        img, mask = batch
+        img, mask, _ = batch
         img, mask = img.to(device), mask.to(device)
 
         output = model(img)
@@ -39,7 +39,7 @@ def validater(model, val_loader, device, args, loss):
 
     with torch.no_grad():
         for batch in tqdm(val_loader, desc = 'Vaidating'):
-            img, mask = batch
+            img, mask, _ = batch
             img, mask = img.to(device), mask.to(device)
 
             output = model(img)
@@ -93,7 +93,7 @@ def tester(model, test_loader, device, args):
 
     with torch.no_grad():
         for batch in tqdm(test_loader, desc='Testing'):
-            img, mask = batch
+            img, mask, _ = batch
             img, mask = img.to(device), mask.to(device)
             output = model(img)
             
