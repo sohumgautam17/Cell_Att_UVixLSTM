@@ -21,27 +21,34 @@ def process(img, ):
     return new_image
 
 
-def watershed(image: np.array, lower_thresh: float, visualize: bool):
-    imgRGB = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+def watershed(image: np.array, lower_thresh: float = 0.7, visualize: bool = None):
     gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    
+    ret, thresh = cv.threshold(gray_image,0,255,cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
 
-    kernel = np.ones((3, 3), np.uint8)
-    imgDilate = cv.morphologyEx(gray_image, cv.MORPH_DILATE, kernel)
+    kernel = np.ones((3,3),np.uint8)
+    opening = cv.morphologyEx(thresh,cv.MORPH_OPEN,kernel, iterations = 2)
 
-    disTrans = cv.distanceTransform(imgDilate, cv.DIST_L2, 5)
-    _, distThresh = cv.threshold(disTrans, lower_thresh * disTrans.max(), 255, cv.THRESH_BINARY)
+    sure_bg = cv.dilate(opening,kernel,iterations=3)
+
+    dist_transform = cv.distanceTransform(opening,cv.DIST_L2,5)
+    ret, sure_fg = cv.threshold(dist_transform,lower_thresh*dist_transform.max(),255,0)
     # print(f'distThresh datatype: {distThresh.dtype}')
 
-    distThresh = np.uint8(distThresh)
-    _, markers = cv.connectedComponents(distThresh)
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv.subtract(sure_bg,sure_fg)
 
-    markers = markers + 1
-
-    # Mark the unknown region as 0
-    markers[distThresh == 0] = 0
+    # Marker labelling
+    ret, markers = cv.connectedComponents(sure_fg)
+    
+    # Add one to all labels so that sure background is not 0, but 1
+    markers = markers+1
+    
+    # Now, mark the region of unknown with zero
+    markers[unknown==255] = 0
 
     # Apply watershed
-    markers = cv.watershed(imgRGB, markers)
+    markers = cv.watershed(image, markers)
     unique_segments = len(np.unique(markers)) - 1 
     image[markers == -1] = [255, 0, 0]  # Mark boundaries with red
 
@@ -60,6 +67,3 @@ def visualize(gt_output, pred_output, gt_cells, pred_cells, args, inst):
     ax[1].imshow(pred_output, cmap='gray')
     ax[1].set_title(f'Predicted Mask (Cell Count: {pred_cells})')
     plt.savefig(f'./runs/watershed/{args.checkpoint}/visualization_{inst}.png')
-
-
-
