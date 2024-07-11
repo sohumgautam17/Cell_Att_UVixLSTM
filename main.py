@@ -30,13 +30,13 @@ def get_args():
     parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
     parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
     parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
-    parser.add_argument('--patch_size', type=int, default=500, desc='please enter patch size')
+    parser.add_argument('--patch_size', type=int, default=250, help='please enter patch size')
     parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
     parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
     parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
     parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
     parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
-    parser.add_argument('--augfly', action='store_false', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
+    parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
 
     return parser.parse_args()
 
@@ -53,11 +53,28 @@ def main(args):
     # Development mode for rapid testing 
     if args.dev:
         args.epochs = 1
-        args.inference = False
         args.log = False
 
-    directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}'
-    ensure_directory_exists(directory_path)
+
+    # Wandb
+
+    if args.log:
+        wandb.init(
+            project = 'cell',
+            name = f'{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}',
+            config = {
+                'lr': args.lr,
+                'batch': args.batch,
+                'patience': args.patience,
+                'weight_decay': args.weight_decay,
+                'model': args.model,
+                'patch_size': args.patch_size,
+                'epochs': args.epochs,
+                ## anything else to config
+            }
+        )
+    
+
 
     # Free memory and empty cache, and set device to use GPU
     gc.collect()
@@ -69,6 +86,8 @@ def main(args):
     # Load data compiled in preprocess.py and extract train, val
     print('Loading Data...')
     all_data = np.load('./Data/all_data.npy', allow_pickle=True).item()
+    print(all_data.keys())
+    # input()
     train_data_imgs = all_data['train_patched_images']
     train_data_masks = all_data['train_patched_masks']
     val_data_imgs = all_data['val_patched_images']
@@ -96,15 +115,19 @@ def main(args):
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle = False)
 
         # Load saved weights from trained model and inference
-        checkpoint = torch.load(f'./runs/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
+        checkpoint = torch.load(f'./runs1/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
         model.load_state_dict(checkpoint['model'])
-        tester(model, test_loader, device, args)
+        # tester(model, test_loader, device, args)
         inference_watershed(model, test_loader, device, args)
 
 
         # This is where Watershed is run
 
     else:
+        
+        directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}'
+        ensure_directory_exists(directory_path)
+        
         # Continue in Dev Mode
         optimizer = ScheduledOptim(
         Adam(filter(lambda x: x.requires_grad, model.parameters()),
@@ -140,6 +163,9 @@ def main(args):
                 'epoch' : epoch
             }
             
+            if args.log:
+                wandb.log({'train_loss': train_loss, 'val_loss': val_loss})
+
             # Save models best performance
             if val_loss <= min(val_losses):
                 torch.save(checkpoint, f'./{directory_path}/best_checkpoint.chkpt')
@@ -151,6 +177,9 @@ def main(args):
                 print('Validation loss has stopped decreasing. Early stopping...')
                 break   
         
+        if args.log:
+            wandb.finish()
+
         fig1 = plt.figure('Figure 1')
         plt.plot(train_losses, label = 'train')
         plt.plot(val_losses, label= 'valid')
