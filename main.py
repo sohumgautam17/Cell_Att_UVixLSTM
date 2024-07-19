@@ -12,6 +12,7 @@ from segmentation_models_pytorch.losses import DiceLoss
 import wandb
 
 from models.models import UNet
+from models.twoDUVixLSTM import UVixLSTM
 
 from postprocess.watershed import inference_watershed
 
@@ -30,7 +31,7 @@ def get_args():
     parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
     parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
     parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
-    parser.add_argument('--patch_size', type=int, default=250, help='please enter patch size')
+    parser.add_argument('--patch_size', type=int, default=256, help='please enter patch size')
     parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
     parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
     parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
@@ -85,7 +86,7 @@ def main(args):
     
     # Load data compiled in preprocess.py and extract train, val
     print('Loading Data...')
-    all_data = np.load('./Data/all_data.npy', allow_pickle=True).item()
+    all_data = np.load('./Data/all_data_256.npy', allow_pickle=True).item()
     print(all_data.keys())
     # input()
     train_data_imgs = all_data['train_patched_images']
@@ -104,7 +105,10 @@ def main(args):
     if args.model == 'unet':
         model = UNet(n_channels=3, n_classes=1, bilinear=True)
         model_hidden_size = 1024 
-        
+    elif args.model == 'xlstm':
+        model = UVixLSTM(class_num = 1, img_dim = 256, in_channels=3)
+        model_hidden_size = 256
+
     model = model.to(device)
     
     # If in Dev Mode Inference Mode OFF, else inference on test dataset
@@ -117,8 +121,8 @@ def main(args):
         # Load saved weights from trained model and inference
         checkpoint = torch.load(f'./runs1/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
         model.load_state_dict(checkpoint['model'])
-        # tester(model, test_loader, device, args)
-        inference_watershed(model, test_loader, device, args)
+        tester(model, test_loader, device, args)
+        # inference_watershed(model, test_loader, device, args)
 
 
         # This is where Watershed is run
