@@ -61,17 +61,17 @@ def he_to_binary_mask(filename, visualize = False):
         rr, cc = polygon2mask((nrow, ncol), coords).nonzero()
         binary_mask[rr, cc] += 255  # Update binary mask
 
-        # Update color mask with random colors (If we do not use we can comment)
-        # color = [random.randint(0, 255) for _ in range(3)]
-        # for j in range(3):
-        #     color_mask[rr, cc, j] = np.clip(color_mask[rr, cc, j] + color[j], 0, 255)
+        # Update color mask with random colors
+        color = [random.randint(0, 255) for _ in range(3)]
+        for j in range(3):
+            color_mask[rr, cc, j] = np.clip(color_mask[rr, cc, j] + color[j], 0, 255)
 
     # visualize masks
     if visualize:
         plt.imsave('./visualized_imgs/' + filename + '_binary.png', binary_mask, cmap='gray')
         plt.close()
-        # plt.imsave('./visualized_imgs/' + filename + '_color.png', color_mask)
-        # plt.close()
+        plt.imsave('./visualized_imgs/' + filename + '_color.png', color_mask)
+        plt.close()
 
     return {
         'original_image': np.array(image),
@@ -79,12 +79,12 @@ def he_to_binary_mask(filename, visualize = False):
         # 'color_mask': color_mask
     }
 
-# image_annot_data_struct = {}
+image_annot_data_struct = {}
 
 
 def load_monuseg():
     files_path = "../MoNuSeg_Images"
-    # filenames = []
+    filenames = []
     imgs = []
     binary_masks = []
 
@@ -94,8 +94,11 @@ def load_monuseg():
         image_array = np.array(data['original_image'])
         img_flip_ud = cv2.flip(image_array, 0)
         img_rotated = np.rot90(img_flip_ud, k=3)
+        # print('monu', img_rotated.shape)
+        img_rotated = cv2.resize(img_rotated, (1024, 1024))
+        binary = cv2.resize(data['binary_mask'], (1024, 1024))
         imgs.append(img_rotated)
-        binary_masks.append(data['binary_mask'])
+        binary_masks.append(binary)
 
     return imgs, binary_masks
 
@@ -151,14 +154,17 @@ def resize_cryo(cryo_images, cryo_annotations):
     resized_mask_array = []
 
     for image, mask in tqdm(zip(cryo_images, cryo_annotations), desc = 'Loading Cryo Images') :
+        # print('cryo', image.shape)
         pil_image = Image.fromarray(image)
-        resized_img = T.Resize(size=(1000,1000))(pil_image)
+        # print(pil_image.shape)
+        resized_img = T.Resize(size=(1024,1024))(pil_image)
         resized_img = np.array(resized_img)
         resized_img_array.append(resized_img)
 
         pil_mask = Image.fromarray(mask).convert("L")
-        resized_mask = T.Resize(size=(1000, 1000), interpolation=Image.NEAREST)(pil_mask)
+        resized_mask = T.Resize(size=(1024, 1024), interpolation=Image.NEAREST)(pil_mask)
         resized_mask = np.array(resized_mask)
         resized_mask_array.append(resized_mask)
 
     return resized_img_array, resized_mask_array
+
