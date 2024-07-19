@@ -8,40 +8,40 @@ import numpy as np
 
 def HorizontalFlip():
     return A.Compose([
-        A.Resize(1000, 1000),
+        A.Resize(1024, 1024),
         A.HorizontalFlip(p=1.0),
         #ToTensorV2()
     ], is_check_shapes=False)  # Disable shape check
 
 def VerticalFlip():
     return A.Compose([
-        A.Resize(1000, 1000),
+        A.Resize(1024, 1024),
         A.VerticalFlip(p=.75),
         #ToTensorV2()
     ])
 
 def RandomCrop():
     return A.Compose([
-        A.Resize(1000, 1000),
+        A.Resize(1024, 1024),
         A.RandomCrop(height=200, width=200, p=.75),
-        A.Resize(1000,1000)
+        A.Resize(1024,1024)
     ])
 
 def Brightness():
     return A.Compose([
-        A.Resize(1000,1000),
+        A.Resize(1024,1024),
         A.ColorJitter(brightness=(0.8, 1.2), p=1.0)
     ])
 
 def Contrast():
     return A.Compose([
-        A.Resize(1000, 1000),
+        A.Resize(1024, 1024),
         A.ColorJitter(contrast=.5, hue=0.8, p=1.0)
     ])
 
 def Gaussian_Noise():
     return A.Compose([
-        A.Resize(1000,1000),
+        A.Resize(1024,1024),
         A.GaussNoise(var_limit=(10.0,50.0), p=1.0)
     ])
 
@@ -114,3 +114,5 @@ def apply_aug(image, mask):
     except Exception as e:
         print("Error:", e)
         raise
+
+
