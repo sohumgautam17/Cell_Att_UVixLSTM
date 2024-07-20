@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from models.model_utils import DoubleConv, Down, Up, OutConv
+from models.model_utils import *
 
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, bilinear=True):

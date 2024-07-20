@@ -5,6 +5,7 @@ from enum import Enum
 import math
 import torch.nn.functional as F
 
+# scaling image smoothly with bicubic interpolation
 def interpolate_sincos(embed, seqlens, mode="bicubic"):
     assert embed.ndim - 2 == len(seqlens)
     embed = F.interpolate(
@@ -92,7 +93,13 @@ class DropPath(nn.Sequential):
 
     def extra_repr(self):
         return f'drop_prob={round(self.drop_prob, 3):0.3f}'
+    
+    # end of vLSTM utils
+
+
 class SequenceTraversal(Enum):
+
+    # Bidirectional traverals
     ROWWISE_FROM_TOP_LEFT = "rowwise_from_top_left"
     ROWWISE_FROM_BOT_RIGHT = "rowwise_from_bot_right"
 
@@ -107,6 +114,7 @@ def bias_linspace_init_(param: torch.Tensor, start: float = 3.4, end: float = 6.
     return param
 
 
+# initialize tensor with values from gaussian dist. 
 def small_init_(param: torch.Tensor, dim: int) -> torch.Tensor:
     """
     Fills the input Tensor with values according to the method described in Transformers without Tears: Improving
@@ -117,7 +125,7 @@ def small_init_(param: torch.Tensor, dim: int) -> torch.Tensor:
     torch.nn.init.normal_(param, mean=0.0, std=std)
     return param
 
-
+# initialize weights of nn layer
 def wang_init_(param: torch.Tensor, dim: int, num_blocks: int):
     """ Adopted from https://github.com/EleutherAI/gpt-neox/blob/main/megatron/model/init_functions.py. """
     std = 2 / num_blocks / math.sqrt(dim)
