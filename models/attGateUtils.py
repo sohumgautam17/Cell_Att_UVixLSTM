@@ -34,7 +34,8 @@ class AttentionBlock(nn.Module):
         )
 
         self.relu = nn.ReLU(inplace=True)
-        self.interpolate = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        self.interpolate1 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False)
+        self.interpolate2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
 
 
     def forward(self, gate, skip_connection):
@@ -46,15 +47,19 @@ class AttentionBlock(nn.Module):
         g1 = self.W_gate(gate)
         x1 = self.W_x(skip_connection)
 
-        print(f'G1 shape: {g1.shape}')
-        print(f'X1 shape: {x1.shape}')
+        # print(f'G1 shape: {g1.shape}')
+        # print(f'X1 shape: {x1.shape}')
+        
+        if g1.shape == (1, 256, 8, 8):
+            g1 = self.interpolate1(g1)
+        else: 
+            g1 = self.interpolate2(g1)
 
-        g1 = self.interpolate(g1)
-        print(f'G1 shape after interpolation: {g1.shape}')
+
+        # print(f'G1 shape after interpolation: {g1.shape}')
 
 
         psi = self.relu(g1 + x1)
         psi = self.psi(psi)
         out = skip_connection * psi
         return out
-

@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torchsummary import summary
 from einops import rearrange
 from monai.networks.blocks import PatchEmbeddingBlock
 import einops
@@ -45,7 +44,6 @@ class EncoderBottleneck(nn.Module):
 
         x = self.conv3(x)
         x = self.norm3(x)
-        # interconnected residual connections
         x = x + x_down
         x = self.relu(x)
 
@@ -91,7 +89,7 @@ class Encoder(nn.Module):
         else:
             dpr = [drop_path_rate] * depth
 
-        # directions of img traversals
+        # directions
         directions = []
         if alternation == "bidirectional":
             for i in range(depth):
@@ -137,41 +135,32 @@ class Encoder(nn.Module):
         return {"pos_embed.embed"}
 
     def forward(self, x):
-        print(f'encoder x og size {x.shape}')
-        x = self.conv1(x) # after conv1 torch.Size([1, 64, 48, 48])
-        
+        x = self.conv1(x) # after conv1 torch.Size([1, 64, 48, 48, 48])
+        # print(x.shape)
         x = self.norm1(x)
         x1 = self.relu(x)
-        print(f'encoder x after conv1 {x1.shape}')
 
-        x2 = self.encoder1(x1) # after encoder1 torch.Size([1, 128, 24, 24])
+        x2 = self.encoder1(x1) # after encoder1 torch.Size([1, 128, 24, 24, 24])
+        # print(x2.shape)
         # input()
-        print(f'encoder x after encoder1 {x2.shape}')
-
         x3 = self.encoder2(x2)
-        print(f'encoder x after encoder2 {x3.shape}')
-
-
-        x4 = self.encoder3(x3)
-        print(f'encoder x after encoder3 {x4.shape}')
-       
-
-        x4 = self.patch_embed(x4)
-        print(f'size after embeddings')
-
-
-        x4= einops.rearrange(x4, "b ... d -> b (...) d")
+        x = self.encoder3(x3)
+        #
+        # print(x.size())
+        x = self.patch_embed(x)
+        # print(x.size())
+        x = einops.rearrange(x, "b ... d -> b (...) d")
         # print(x.size())
 
         for block in self.blocks:
-            x4 = block(x4)
-        x4 = self.legacy_norm(x4)
-        x4 = self.norm(x4) # torch.Size([1, 9, 256])
-        print(f'size after norm {x4.shape}')
-        x4 = rearrange(x4, "b (x y) c -> b c x y", x=self.output_shape[0], y=self.output_shape[0])
-        print(f'after rearrange {x4.shape}')
+            x = block(x)
+        x = self.legacy_norm(x)
+        x = self.norm(x) # torch.Size([1, 9, 256])
+        # print(x.shape)
+        x = rearrange(x, "b (x y) c -> b c x y", x=self.output_shape[0], y=self.output_shape[0])
+        # print(x.shape)
         # input()
-        return x1, x2, x3, x4
+        return x, x1, x2, x3
 
 
 class DecoderBottleneck(nn.Module):
@@ -207,7 +196,7 @@ class DecoderBottleneck(nn.Module):
         
         if x_concat is not None:
             target_size = x_concat.shape[2:]
-            x = F.interpolate(x, size=target_size, mode='bicubic', align_corners=True)
+            x = F.interpolate(x, size=target_size, mode='bilinear', align_corners=True)
         else:
             x = self.upsample(x)
         
@@ -222,7 +211,7 @@ class DecoderBottleneck(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, out_channels, class_num):
         super().__init__()
-        
+
         self.decoder1 = DecoderBottleneck(out_channels * 8, out_channels * 2)
         self.decoder2 = DecoderBottleneck(out_channels * 4, out_channels)
         self.decoder3 = DecoderBottleneck(out_channels * 2, int(out_channels * 1 / 2))
@@ -230,37 +219,34 @@ class Decoder(nn.Module):
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1, stride = 2)
 
-        self.attention_block1 = AttentionBlock(out_channels * 8, out_channels * 8, out_channels * 4)
-        self.attention_block2 = AttentionBlock(out_channels * 4, out_channels * 4, out_channels * 2)
-        self.attention_block3 = AttentionBlock(out_channels * 2, out_channels * 2, out_channels)
-        self.attention_block4 = AttentionBlock(out_channels, out_channels, out_channels // 2)
+        self.attention_block1 = AttentionBlock(F_g= out_channels*4, F_l=out_channels * 4, n_coefficients=out_channels * 4)
+        self.attention_block2 = AttentionBlock(F_g=out_channels * 2, F_l=out_channels * 2, n_coefficients=out_channels * 2)
+        self.attention_block3 = AttentionBlock(F_g=out_channels, F_l=out_channels , n_coefficients=out_channels//2)
+        # self.attention_block4 = AttentionBlock(F_g=out_channels, F_l = out_channels, out_channels // 2)
 
 
-    def forward(self, x1, x2, x3, x4):
-        print(f'decoder  x1: {x1.shape} | x2: {x2.shape} | x3: {x3.shape} | x: {x4.shape},')
+    def forward(self, x, x1, x2, x3):
 
-        x4 = self.attention_block1(gate=x4, skip_connection=x4)
-        print(f'After attention_block1, x: {x.shape} | x4: {x4.shape}')
-        x = self.decoder1(x4, x4)
-        print(f'first decoder: {x.shape}')
+        x3 = self.attention_block1(x, x3)
+        # print(f'x3 shape after attention layer is {x3.shape}')
+        x = self.decoder1(x, x3)
+        # print(f'shape after decoder 1: {x.shape}')
 
-        x3 = self.attention_block2(gate=x, skip_connection=x3)
-        print(f'After attention_block2, x: {x.shape} | x3: {x3.shape}')
-        x = self.decoder2(x, x3)
-        print(f'second decoder: {x.shape}')
+        x2 = self.attention_block2(x, x2)
+        # print(f'x2 shape after attention layer is {x2.shape}')
+        x = self.decoder2(x, x2)
+        # print(f'shape after decoder 2: {x.shape}')
 
-        x2 = self.attention_block3(gate=x, skip_connection=x2)
-        print(f'After attention_block3, x: {x.shape} | x2: {x1.shape}')
-        x = self.decoder3(x, x2)
-        print(f'third decoder: {x.shape}')
+        x1 = self.attention_block3(x, x1)
+        x = self.decoder3(x, x1)
+        # print(f'shape after decoder 3: {x.shape}')
 
-        x1 = self.attention_block4(gate=x, skip_connection=x1)
-        print(f'After attention_block4, x: {x.shape} | x1: {x1.shape}')
-        x = self.decoder4(x, x1)
-        print(f'fourth decoder: {x.shape}')
+        x = self.decoder4(x)
+        # print(f'shape after decoder 4: {x.shape}')
 
         x = self.conv1(x)
-        print(f'last {x.shape}')
+        # print(f'shape after decoder 5: {x.shape}')
+
 
         return x
 
@@ -278,8 +264,8 @@ class UVixLSTM(nn.Module):
         self.decoder = Decoder(out_channels, class_num)
 
     def forward(self, x):
-        x1, x2, x3, x4 = self.encoder(x)
-        print(x1.size(), x2.size(), x3.size(), x4.size())
-        x = self.decoder(x1, x2, x3, x4)
-        
+        x, x1, x2, x3 = self.encoder(x)
+            # print(x.size(), x1.size(), x2.size(), x3.size())
+        x = self.decoder(x, x1, x2, x3)
+
         return x
