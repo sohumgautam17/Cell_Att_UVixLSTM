@@ -13,8 +13,10 @@ import wandb
 
 from models.models import UNet
 from models.twoDUVixLSTM import UVixLSTM
+from models.AttTwoDUVixLSTM import AttUVixLSTM
+from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
 
-from postprocess.watershed import inference_watershed
+# from postprocess.watershed import inference_watershed
 
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
@@ -108,6 +110,12 @@ def main(args):
     elif args.model == 'xlstm':
         model = UVixLSTM(class_num = 1, img_dim = 256, in_channels=3)
         model_hidden_size = 256
+    elif args.model == 'attxlstm':
+        model = AttUVixLSTM(class_num =1, img_dim = 256, in_channels=3)
+        model_hidden_size = 256
+    elif args.model == 'attxlstm2':
+        model = AttUVixLSTM2(class_num =1, img_dim = 256, in_channels = 3)
+        model_hidden_size = 256
 
     model = model.to(device)
     
@@ -119,7 +127,7 @@ def main(args):
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle = False)
 
         # Load saved weights from trained model and inference
-        checkpoint = torch.load(f'./runs1/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
+        checkpoint = torch.load(f'./runs/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
         model.load_state_dict(checkpoint['model'])
         tester(model, test_loader, device, args)
         # inference_watershed(model, test_loader, device, args)
@@ -129,7 +137,7 @@ def main(args):
 
     else:
         
-        directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}'
+        directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}_{args.augfly}_{args.loss}'
         ensure_directory_exists(directory_path)
         
         # Continue in Dev Mode
@@ -138,9 +146,15 @@ def main(args):
             betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)
         
         if args.loss == 'dice':
-            loss = DiceLoss(mode='binary')
+            dc_loss = DiceLoss(mode='binary')
+            bce_loss = None
         elif args.loss == 'bce':
-            loss = torch.nn.BCEWithLogitsLoss()
+            bce_loss = torch.nn.BCEWithLogitsLoss()
+            dc_loss = None
+        elif args.loss == 'all':
+            bce_loss = torch.nn.BCEWithLogitsLoss()
+            dc_loss = DiceLoss(mode='binary')
+        
 
         # Train, Val loss tracking for visualization
         train_losses = []
@@ -151,11 +165,11 @@ def main(args):
         for epoch in range(args.epochs):
             
             all_epochs.append(epoch)
-            train_loss = trainer(model, train_loader, optimizer, device, args, loss)
+            train_loss = trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss)
             print(f"Training - Epoch: {epoch+1},Train Loss: {train_loss}")
             train_losses.append(train_loss)
             
-            val_loss = validater(model, val_loader, device, args, loss)
+            val_loss = validater(model, val_loader, device, args, dc_loss, bce_loss)
             print(f"Evaluation - Epoch: {epoch+1}, Val Loss: {val_loss}")
             val_losses.append(val_loss)
             
