@@ -7,7 +7,7 @@ import numpy as np
 
 ## Functionized Training, Val, and Test Loops
 
-def trainer(model, train_loader, optimizer, device, args, loss):
+def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
     model.train()
     losses = 0
     len_of_batch = 0
@@ -16,9 +16,15 @@ def trainer(model, train_loader, optimizer, device, args, loss):
         optimizer.zero_grad()
         img, mask, _ = batch
         img, mask = img.to(device), mask.to(device)
-
+        # print(img.shape)
+        # input()
         output = model(img)
-        loss_value = loss(output, mask)
+        if args.loss == 'dice':
+            loss_value = dc_loss(output, mask)
+        elif args.loss == 'bce':
+            loss_value = bce_loss(output, mask)
+        elif args.loss == 'all':
+            loss_value = dc_loss(output, mask) + bce_loss(output, mask)
         loss_value.backward()
         optimizer.step_and_update_lr()
         losses += loss_value.item()
@@ -32,7 +38,7 @@ def trainer(model, train_loader, optimizer, device, args, loss):
     
     return average_loss
 
-def validater(model, val_loader, device, args, loss):
+def validater(model, val_loader, device, args, dc_loss, bce_loss):
     model.eval()
     losses = 0
     len_of_batch = 0
@@ -43,7 +49,12 @@ def validater(model, val_loader, device, args, loss):
             img, mask = img.to(device), mask.to(device)
 
             output = model(img)
-            loss_value = loss(output, mask)
+            if args.loss == 'dice':
+                loss_value = dc_loss(output, mask)
+            elif args.loss == 'bce':
+                loss_value = bce_loss(output, mask)
+            elif args.loss == 'all':
+                loss_value = dc_loss(output, mask) + bce_loss(output, mask)
             losses += loss_value.item()
             len_of_batch += 1
             
