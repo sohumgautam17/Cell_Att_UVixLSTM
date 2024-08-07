@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
-
+from PIL import Image
 ## Functionized Training, Val, and Test Loops
 
 def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):

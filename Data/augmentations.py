@@ -1,10 +1,12 @@
 import os
 os.environ['ALBUMENTATIONS_DISABLE_UPDATE_CHECK'] = '1'
-
+import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from PIL import Image
 import numpy as np
+from typing import List, Tuple
+
 
 def HorizontalFlip():
     return A.Compose([
@@ -50,69 +52,40 @@ def Gaussian_Noise():
 #         A.RandomAffine()
 #     ])
 
+'''-> Tuple[np.ndarray, np.ndarray]'''
 
-def apply_aug(image, mask):
-    # # Ensure image and mask are converted to uint8 and maintain dimensions
-    # if image.ndim == 2:
-    #     image = np.expand_dims(image, axis=-1)
-    # if mask.ndim == 2:
-    #     mask = np.expand_dims(mask, axis=-1)
+def apply_aug(images: np.ndarray, masks: np.ndarray):
 
-    # # Ensure image has 3 channels and mask has 1 channel
-    # if image.shape[-1] == 1:
-    #     image = np.repeat(image, 3, axis=-1)
-    # if mask.shape[-1] == 1:
-    #     mask = mask[..., 0]
+    horiz_trans = HorizontalFlip()
+    vert_trans = VerticalFlip()
+    random_crop = RandomCrop()
+    brightness = Brightness()
+    contrast = Contrast()
+    gaussian_noise = Gaussian_Noise()
 
-    image = np.array(image).astype(np.uint8)
-    mask = np.array(mask).astype(np.uint8)
+    all_augs = [horiz_trans,vert_trans,random_crop, brightness, contrast, gaussian_noise]
+
+    aug_images = []
+    aug_masks = []
     
-    try:
-        horiz_trans = HorizontalFlip()
-        vert_trans = VerticalFlip()
-        random_crop = RandomCrop()
-        brightness = Brightness()
-        contrast = Contrast()
-        gaussian_noise = Gaussian_Noise()
+    for aug in all_augs:
+        aug_result = [aug(image=image, mask=mask) for image, mask in zip(images, masks)]
+        aug_images.extend(aug['image'] for aug in aug_result)
+        aug_masks.extend(aug['mask'] for aug in aug_result)
+    return aug_images, aug_masks
 
+# def test():
+#     image = np.random.rand(1024, 1024, 3) * 255 
+#     mask = np.random.rand(1024, 1024) * 255  
 
-        horiz_transformed = horiz_trans(image=image, mask=mask)
-        vert_transformed = vert_trans(image=image, mask=mask)
-        random_crop = random_crop(image=image, mask=mask)
-        brightness = brightness(image=image, mask=mask)
-        contrast = contrast(image=image, mask=mask)
-        gaussian_noise = gaussian_noise(image=image, mask=mask)
+#     image = image.astype(np.uint8)
+#     mask = mask.astype(np.uint8)
 
+#     aug_images, aug_masks = apply_aug([image], [mask])
+#     print(f'Number of augmented images: {len(aug_images)}')
+#     print(f'Number of augmented masks: {len(aug_masks)}')
 
-
-        transformed_image_1 = horiz_transformed["image"]
-        transformed_mask_1 = horiz_transformed["mask"]
-
-        transformed_image_2 = vert_transformed["image"]
-        transformed_mask_2 = vert_transformed["mask"]
-
-        transformed_image_3 = random_crop["image"]
-        transformed_mask_3 = random_crop["mask"]
-
-        transformed_image_4 = brightness["image"]
-        transformed_mask_4 = brightness["mask"]
-
-        transformed_image_5 = contrast["image"]
-        transformed_mask_5 = contrast["mask"]
-
-        transformed_image_6 = gaussian_noise["image"]
-        transformed_mask_6 = gaussian_noise["mask"]
-
-
-        return {
-            "images": [image, transformed_image_1, transformed_image_2, transformed_image_3,
-                       transformed_image_4, transformed_image_5, transformed_image_6],
-            "masks": [mask, transformed_mask_1, transformed_mask_2, transformed_mask_3,
-                      transformed_mask_4, transformed_mask_5, transformed_mask_6]
-        }
-
-    except Exception as e:
-        print("Error:", e)
-        raise
-
+#     # Example of checking shapes
+#     print(f'Augmented image shape: {aug_images[0].shape}')
+#     print(f'Augmented mask shape: {aug_masks[0].shape}')
 

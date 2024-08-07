@@ -84,7 +84,6 @@ image_annot_data_struct = {}
 
 def load_monuseg():
     files_path = "../MoNuSeg_Images"
-    filenames = []
     imgs = []
     binary_masks = []
 

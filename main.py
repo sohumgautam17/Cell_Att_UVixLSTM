@@ -12,9 +12,10 @@ from segmentation_models_pytorch.losses import DiceLoss
 import wandb
 
 from models.models import UNet
-from models.twoDUVixLSTM import UVixLSTM
-from models.AttTwoDUVixLSTM import AttUVixLSTM
-from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
+from models.UVixLSTM_Att import UVixLSTM_Att
+from models.UVixLSTM_noAtt import UVixLSTM_noAtt
+# from models.AttTwoDUVixLSTM import AttUVixLSTM
+# from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
 
 # from postprocess.watershed import inference_watershed
 
@@ -88,11 +89,14 @@ def main(args):
     
     # Load data compiled in preprocess.py and extract train, val
     print('Loading Data...')
-    all_data = np.load('./Data/all_data_256.npy', allow_pickle=True).item()
+    all_data = np.load('./Data/all_data.npy', allow_pickle=True).item()
     print(all_data.keys())
     # input()
     train_data_imgs = all_data['train_patched_images']
+    print(len(train_data_imgs))
     train_data_masks = all_data['train_patched_masks']
+    print(len(train_data_masks))
+
     val_data_imgs = all_data['val_patched_images']
     val_data_masks = all_data['val_patched_masks']
 
@@ -107,15 +111,13 @@ def main(args):
     if args.model == 'unet':
         model = UNet(n_channels=3, n_classes=1, bilinear=True)
         model_hidden_size = 1024 
-    elif args.model == 'xlstm':
-        model = UVixLSTM(class_num = 1, img_dim = 256, in_channels=3)
-        model_hidden_size = 256
     elif args.model == 'attxlstm':
-        model = AttUVixLSTM(class_num =1, img_dim = 256, in_channels=3)
+        model = UVixLSTM_Att(class_num = 1, img_dim = 256, in_channels=3)
         model_hidden_size = 256
-    elif args.model == 'attxlstm2':
-        model = AttUVixLSTM2(class_num =1, img_dim = 256, in_channels = 3)
+    elif args.model == 'xlstm':
+        model = UVixLSTM_noAtt(class_num =1, img_dim = 256, in_channels=3)
         model_hidden_size = 256
+  
 
     model = model.to(device)
     

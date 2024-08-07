@@ -19,6 +19,9 @@ CryoNuSeg_Images/
 MoNuSeg_Annotations/
 MoNuSeg_Images/
 
+all_data.npy
+all_data_256.npy
+
 *.tif
 *.png
 *.xml
@@ -27,3 +30,4 @@ MoNuSeg_Images/
 .Python/
 build/
 downloads/
+
