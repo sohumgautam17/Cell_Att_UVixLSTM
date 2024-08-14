@@ -167,3 +167,27 @@ def resize_cryo(cryo_images, cryo_annotations):
 
     return resized_img_array, resized_mask_array
 
+###____________________________________________________________________________________________###
+
+def load_pannuke():
+    images_file_path = '/mnt/data2/sohum/datasets/panuke/Fold 1/images/fold1/images.npy'
+    images = np.load(images_file_path)
+    images = (images).astype(np.uint8)
+
+    print("Images shape:", images.shape)
+    print("Images dtype:", images.dtype)
+
+    mask_file_path = '/mnt/data2/sohum/datasets/panuke/Fold 1/masks/fold1/masks.npy'
+    masks = np.load(mask_file_path)
+    masks_reshaped = []
+
+    # merge all 6 channels into 1
+    for mask in tqdm(masks):
+        merged_mask = np.ones((256, 256), dtype=np.uint8)
+        for i in range(6):
+            merged_mask[mask[:, :, i] == 1] = 0
+        masks_reshaped.append(merged_mask)
+
+    return images, masks_reshaped   
+
+

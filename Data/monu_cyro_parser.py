@@ -14,6 +14,7 @@ start_time = time.process_time()
 def main(args):    
     cryo_images, cryo_annotations = load_cryo()
     cryo_images, cryo_annotations = resize_cryo(cryo_images=cryo_images, cryo_annotations=cryo_annotations)
+    # print(cryo_annotations[0])
    
     monu_images, monu_annotations = load_monuseg()
 
@@ -71,7 +72,7 @@ def main(args):
     end_time = time.process_time()
     print(float(end_time-start_time))
 
-    np.save('./all_data.npy', data)
+    # np.save('./all_data.npy', data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Preprocesseing images and masks')
