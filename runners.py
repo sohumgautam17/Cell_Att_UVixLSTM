@@ -1,10 +1,23 @@
 from tqdm import tqdm
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+
+def one_hot_encoding(tensor, num_classes):
+    """ Convert tensor to one-hot encoding. """
+    tensor = tensor.to(torch.int64)  # Ensure tensor is of type int64
+    shape = list(tensor.shape)
+    shape.append(num_classes)
+    one_hot = torch.zeros(shape, device=tensor.device)
+    # Expand tensor dimensions and use scatter_
+    one_hot.scatter_(1, tensor.unsqueeze(1), 1)
+    return one_hot
+
+
 ## Functionized Training, Val, and Test Loops
 
 def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
@@ -16,8 +29,23 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
         optimizer.zero_grad()
         img, mask, _ = batch
         img, mask = img.to(device), mask.to(device)
-        # print(img.shape)
-        # input()
+        # print(img)        
+        ####vizualising 
+        # img_cpu = img[0].cpu().numpy()  # Move the tensor to the CPU and convert it to a NumPy array
+        # img_cpu = img_cpu.transpose(1, 2, 0)  # Rearrange dimensions if necessary (C, H, W) -> (H, W, C)
+        # plt.imshow(img_cpu)
+        # plt.axis('off')  # Turn off axis
+        # plt.savefig(f'./train_img.png', bbox_inches='tight', pad_inches=0)
+        # plt.close()  # Close the figure to free memory
+
+        # mask_cpu = mask[0].cpu().numpy()
+        # mask_cpu = mask_cpu.transpose(1, 2, 0)  # Rearrange dimensions if necessary (C, H, W) -> (H, W, C)
+        # plt.imshow(mask_cpu)
+        # plt.axis('off')
+        # plt.savefig(f'./train_mask.png', bbox_inches='tight', pad_inches=0)
+        # plt.close()  # Close the figure to free memory
+        ####
+
         output = model(img)
         if args.loss == 'dice':
             loss_value = dc_loss(output, mask)
@@ -25,8 +53,12 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
             loss_value = bce_loss(output, mask)
         elif args.loss == 'all':
             loss_value = dc_loss(output, mask) + bce_loss(output, mask)
+
+
         loss_value.backward()
         optimizer.step_and_update_lr()
+        # optimizer.step()
+
         losses += loss_value.item()
         len_of_batch += 1
         
@@ -55,6 +87,8 @@ def validater(model, val_loader, device, args, dc_loss, bce_loss):
                 loss_value = bce_loss(output, mask)
             elif args.loss == 'all':
                 loss_value = dc_loss(output, mask) + bce_loss(output, mask)
+
+
             losses += loss_value.item()
             len_of_batch += 1
             

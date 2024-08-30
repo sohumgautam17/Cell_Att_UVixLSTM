@@ -48,10 +48,31 @@ def Gaussian_Noise():
         A.GaussNoise(var_limit=(10.0,50.0), p=1.0)
     ])
 
-# def Affine():
-#     return A.Compose([
-#         A.RandomAffine()
-#     ])
+
+### These are new
+
+def Zoom_Blur():
+    return A.Compose([
+        A.RandomScale(scale_limit=(0.1, 0.2), p=1.0), 
+        A.MotionBlur(blur_limit=15, p=1.0),       
+        A.Resize(256, 256),
+    ])
+
+def Rotate():
+    return A.Compose([
+        A.Resize(256, 256),
+        A.Rotate(limit=(-90, 90), p=0.75),
+        A.Resize(256, 256),
+
+    ])
+
+def Elastic_Transform():
+    return A.Compose({
+        A.Resize(256, 256),
+        A.ElasticTransform(alpha=1, sigma=50, alpha_affine=50, p=1.0),
+        A.Resize(256, 256),
+
+    })
 
 
 def apply_aug(images, masks):
@@ -62,8 +83,11 @@ def apply_aug(images, masks):
     brightness = Brightness()
     contrast = Contrast()
     gaussian_noise = Gaussian_Noise()
+    zoom_blur = Zoom_Blur()
+    rotate = Rotate()
+    elastic = Elastic_Transform()
 
-    all_augs = [horiz_trans,vert_trans,random_crop, brightness, contrast, gaussian_noise]
+    all_augs = [horiz_trans,vert_trans,random_crop, brightness, contrast, gaussian_noise, zoom_blur, rotate, elastic]
 
     aug_images = []
     aug_masks = []

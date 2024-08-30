@@ -170,24 +170,37 @@ def resize_cryo(cryo_images, cryo_annotations):
 ###____________________________________________________________________________________________###
 
 def load_pannuke():
-    images_file_path = '/mnt/data2/sohum/datasets/panuke/Fold 1/images/fold1/images.npy'
-    images = np.load(images_file_path)
-    images = (images).astype(np.uint8)
+    images_fold_1 = '/mnt/data2/sohum/datasets/panuke/Fold_1/images/fold1/images.npy'
+    images_1 = np.load(images_fold_1)
 
-    print("Images shape:", images.shape)
-    print("Images dtype:", images.dtype)
+    images_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/images.npy'
+    images_2 = np.load(images_fold_2)
 
-    mask_file_path = '/mnt/data2/sohum/datasets/panuke/Fold 1/masks/fold1/masks.npy'
-    masks = np.load(mask_file_path)
+    all_images = np.concatenate((images_1, images_2), axis=0)  # Concatenate along the first dimension
+    all_images = (all_images).astype(np.uint8)
+
+    print("Images shape:", all_images.shape)
+    print("Images dtype:", all_images.dtype)
+
+    mask_fold_1 = '/mnt/data2/sohum/datasets/panuke/Fold_1/masks/fold1/masks.npy'
+    masks_1 = np.load(mask_fold_1)
+
+    mask_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/masks.npy'
+    masks_2 = np.load(mask_fold_2)
+
+    all_masks = np.concatenate((masks_1, masks_2), axis=0)  # Concatenate along the first dimension
+    print("Masks shape:", all_masks.shape)
+    print("Masks dtype:", all_masks.dtype)
+
     masks_reshaped = []
 
     # merge all 6 channels into 1
-    for mask in tqdm(masks):
+    for mask in tqdm(all_masks):
         merged_mask = np.ones((256, 256), dtype=np.uint8)
         for i in range(6):
             merged_mask[mask[:, :, i] == 1] = 0
         masks_reshaped.append(merged_mask)
 
-    return images, masks_reshaped   
+    return all_images, masks_reshaped   
 
 

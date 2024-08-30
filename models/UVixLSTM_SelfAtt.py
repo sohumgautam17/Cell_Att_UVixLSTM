@@ -7,7 +7,7 @@ from enum import Enum
 import math
 import torch.nn.functional as F
 from models.vLSTM import *
-from models.attGateUtils import AttentionBlock
+from models.model_utils import *
 
 class EncoderBottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, base_width=64):
@@ -219,25 +219,15 @@ class Decoder(nn.Module):
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1, stride = 2)
 
-        self.attention_block1 = AttentionBlock(F_g= out_channels*4, F_l=out_channels * 4, n_coefficients=out_channels * 4)
-        self.attention_block2 = AttentionBlock(F_g=out_channels * 2, F_l=out_channels * 2, n_coefficients=out_channels * 2)
-        self.attention_block3 = AttentionBlock(F_g=out_channels, F_l=out_channels , n_coefficients=out_channels//2)
-        # self.attention_block4 = AttentionBlock(F_g=out_channels, F_l = out_channels, out_channels // 2)
-
 
     def forward(self, x, x1, x2, x3):
 
-        x3 = self.attention_block1(x, x3)
-        # print(f'x3 shape after attention layer is {x3.shape}')
         x = self.decoder1(x, x3)
         # print(f'shape after decoder 1: {x.shape}')
 
-        x2 = self.attention_block2(x, x2)
-        # print(f'x2 shape after attention layer is {x2.shape}')
         x = self.decoder2(x, x2)
         # print(f'shape after decoder 2: {x.shape}')
 
-        x1 = self.attention_block3(x, x1)
         x = self.decoder3(x, x1)
         # print(f'shape after decoder 3: {x.shape}')
 
@@ -250,7 +240,7 @@ class Decoder(nn.Module):
 
         return x
 
-class UVixLSTM_Att(nn.Module):
+class UVixLSTM_noAtt(nn.Module):
     def __init__(self, class_num=1, img_dim=256,
                      in_channels=3,
                      out_channels=64,
@@ -262,10 +252,18 @@ class UVixLSTM_Att(nn.Module):
                                    depth, dim)
 
         self.decoder = Decoder(out_channels, class_num)
+        self.MHSA = MultiHeadSelfAttention(256)
+
+
 
     def forward(self, x):
         x, x1, x2, x3 = self.encoder(x)
-            # print(x.size(), x1.size(), x2.size(), x3.size())
+        # put the multihead slef attention layer here 
+
+        x = self.MHSA(x)
+    
+
+        # print(x.size(), x1.size(), x2.size(), x3.size())
         x = self.decoder(x, x1, x2, x3)
 
         return x

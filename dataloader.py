@@ -3,6 +3,8 @@ from torch.utils.data import Dataset
 import numpy as np
 from torchvision import transforms
 from PIL import Image
+from utils import get_args  # Import the args object from main.py
+args = get_args()
 
 # Create custom PyTorch for files 
 class CellDataset(Dataset):
@@ -37,11 +39,17 @@ class CellDataset(Dataset):
     def __getitem__(self, index):
         img = self.imgs[index]
         mask = self.masks[index]
-        # print(img.shape)
-        # print(mask.shape)
         trans_img = self.transform(Image.fromarray(img))
-        # print(trans_img.shape)
-        mask = self.mask_transform(mask)
-        # print(mask.shape)
+
         
+        if args.dataset == './Data/all_data.npy':
+            mask = self.mask_transform(mask)
+        else:
+            mask = torch.Tensor(mask.squeeze())
+            mask = mask.unsqueeze(0)
+
+        # print(mask)
+        # print(np.unique(mask))
+        # input('testing')
+
         return trans_img, mask, img

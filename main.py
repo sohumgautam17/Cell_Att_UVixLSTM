@@ -1,8 +1,10 @@
 import torch
 torch.set_num_threads(2)
-import argparse
+# import argparse
+
 from torch.utils.data import DataLoader
 import gc
+from utils import get_args
 from torch.optim import Adam
 import torch.nn as nn
 import numpy as np
@@ -22,28 +24,7 @@ from models.UVixLSTM_noAtt import UVixLSTM_noAtt
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
 from dataloader import CellDataset
-
-
-def get_args():
-    parser = argparse.ArgumentParser(description='Initialize Hyperparameters')
-    parser.add_argument('--lr', type = float, default = 1e-4, help='Please choose the learning rate')
-    parser.add_argument('--patience', type = int, default = 5, help = 'Please choose the patience of the early stopper')
-    parser.add_argument('--device', type = str, default = 'cuda', help = 'Please choose the type of device' )
-    parser.add_argument('--warmup', type = int, default = 2000, help = 'Please choose the number of warmup steps for the optimizer' )
-    parser.add_argument('--epochs', type = int, default = 100, help = 'Please choose the number of epochs' )
-    parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
-    parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
-    parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
-    parser.add_argument('--patch_size', type=int, default=256, help='please enter patch size')
-    parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
-    parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
-    parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
-    parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
-    parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
-    parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
-
-    return parser.parse_args()
-
+    
 def ensure_directory_exists(directory_path):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
@@ -89,7 +70,8 @@ def main(args):
     
     # Load data compiled in preprocess.py and extract train, val
     print('Loading Data...')
-    all_data = np.load('./Data/all_data.npy', allow_pickle=True).item()
+    print(args.dataset)
+    all_data = np.load(args.dataset, allow_pickle=True).item()
     print(all_data.keys())
     # input()
     train_data_imgs = all_data['train_patched_images']
@@ -146,16 +128,32 @@ def main(args):
         optimizer = ScheduledOptim(
         Adam(filter(lambda x: x.requires_grad, model.parameters()),
             betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)
+        '''
+        optimizer = Adam(
+                        filter(lambda x: x.requires_grad, model.parameters()), 
+                        lr=args.lr, 
+                        betas=(0.9, 0.98), 
+                        eps=1e-4, 
+                        weight_decay=args.weight_decay
+                    )
+        '''
+        
+        '''ScheduledOptim(
+        Adam(filter(lambda x: x.requires_grad, model.parameters()),
+            betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)'''
         
         if args.loss == 'dice':
             dc_loss = DiceLoss(mode='binary')
             bce_loss = None
+
         elif args.loss == 'bce':
             bce_loss = torch.nn.BCEWithLogitsLoss()
             dc_loss = None
+
         elif args.loss == 'all':
             bce_loss = torch.nn.BCEWithLogitsLoss()
             dc_loss = DiceLoss(mode='binary')
+            ####
         
 
         # Train, Val loss tracking for visualization
@@ -210,7 +208,7 @@ def main(args):
         plt.title('loss change curve')
         plt.savefig(f'./{directory_path}/loss_plot.png')
         plt.close()
-
+        
 
 if __name__ == "__main__":
     args = get_args()

@@ -64,7 +64,7 @@ def main():
     end_time = time.process_time()
     print(float(end_time-start_time))
     
-    np.save('./pannuke_fold1', data)
+    np.save('./pannuke_fold1+2_more_augs', data)
 
 if __name__ == "__main__":
     print('Preprocessing Data...')

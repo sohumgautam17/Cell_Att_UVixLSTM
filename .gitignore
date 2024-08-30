@@ -21,7 +21,21 @@ MoNuSeg_Images/
 
 all_data.npy
 all_data_256.npy
+images_fold1.npy
+masks_fold1.npy
+images_fold2.npy
+masks_fold2.npy
+images_fold3.npy
+masks_fold3.npy
 
+
+
+pannuke.npy
+pannuke_fold1.npy
+pannuke_fold1+2.npy
+Data/pannuke_fold1+2_more_augs.npy
+image_annot_data_struct.npy
+runs/
 *.tif
 *.png
 *.xml
@@ -31,3 +45,7 @@ all_data_256.npy
 build/
 downloads/
 
+
+
+# misc
+__pycache__/process_data.cpython-38.pyc

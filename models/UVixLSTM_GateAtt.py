@@ -7,6 +7,7 @@ from enum import Enum
 import math
 import torch.nn.functional as F
 from models.vLSTM import *
+from models.attGateUtils import AttentionBlock
 
 class EncoderBottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, base_width=64):
@@ -69,15 +70,20 @@ class Encoder(nn.Module):
         self.encoder1 = EncoderBottleneck(out_channels, out_channels * 2, stride=2)
         self.encoder2 = EncoderBottleneck(out_channels * 2, out_channels * 4, stride=2)
         self.encoder3 = EncoderBottleneck(out_channels * 4, out_channels * 8, stride=2)
-        self.patch_embed = PatchEmbeddingBlock(in_channels=out_channels * 8,
-                                               img_size=img_dim // 16,
+    ### added more encoder blocks
+        self.encoder4 = EncoderBottleneck(out_channels*8, out_channels*16, stride=2)
+        self.encoder5 = EncoderBottleneck(out_channels * 16, out_channels * 32, stride=2)
+
+
+        self.patch_embed = PatchEmbeddingBlock(in_channels=out_channels * 32,
+                                               img_size=img_dim // 32,
                                                patch_size=2,
                                                hidden_size=256,
                                                num_heads=1,
                                                proj_type='perceptron',
                                                spatial_dims=2)
 
-        self.conv2 = nn.Conv2d(out_channels * 8, 512,
+        self.conv2 = nn.Conv2d(out_channels * 32, 512,
                                kernel_size=3, stride=1, padding=1)
         self.norm2 = nn.BatchNorm2d(512)
         self.alternation = alternation
@@ -120,7 +126,7 @@ class Encoder(nn.Module):
         # head
 
         # no head -> use as feature extractor
-        self.output_shape = ((img_dim // 16) // 2, dim)
+        self.output_shape = ((img_dim // 32) // 2, dim)
 
     def load_state_dict(self, state_dict, strict=True):
         # interpolate pos_embed for different resolution (e.g. for fine-tuning on higher-resolution)
@@ -143,7 +149,18 @@ class Encoder(nn.Module):
         # print(x2.shape)
         # input()
         x3 = self.encoder2(x2)
-        x = self.encoder3(x3)
+        print(f'x3 shape {x3.shape}')
+
+        x4 = self.encoder3(x3)
+        print(f'x4 shape {x4.shape}')
+
+        x5 = self.encoder4(x4)
+        print(f'x5 shape {x5.shape}')
+
+
+        x = self.encoder5(x5)
+        print(f'x shape {x.shape}')
+
         #
         # print(x.size())
         x = self.patch_embed(x)
@@ -159,7 +176,7 @@ class Encoder(nn.Module):
         x = rearrange(x, "b (x y) c -> b c x y", x=self.output_shape[0], y=self.output_shape[0])
         # print(x.shape)
         # input()
-        return x, x1, x2, x3
+        return x, x1, x2, x3, x4, x5
 
 
 class DecoderBottleneck(nn.Module):
@@ -218,14 +235,25 @@ class Decoder(nn.Module):
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1, stride = 2)
 
+        self.attention_block1 = AttentionBlock(F_g= out_channels*4, F_l=out_channels * 4, n_coefficients=out_channels * 4)
+        self.attention_block2 = AttentionBlock(F_g=out_channels * 2, F_l=out_channels * 2, n_coefficients=out_channels * 2)
+        self.attention_block3 = AttentionBlock(F_g=out_channels, F_l=out_channels , n_coefficients=out_channels//2)
+        # self.attention_block4 = AttentionBlock(F_g=out_channels, F_l = out_channels, out_channels // 2)
+
+
     def forward(self, x, x1, x2, x3):
 
+        x3 = self.attention_block1(x, x3)
+        # print(f'x3 shape after attention layer is {x3.shape}')
         x = self.decoder1(x, x3)
         # print(f'shape after decoder 1: {x.shape}')
 
+        x2 = self.attention_block2(x, x2)
+        # print(f'x2 shape after attention layer is {x2.shape}')
         x = self.decoder2(x, x2)
         # print(f'shape after decoder 2: {x.shape}')
 
+        x1 = self.attention_block3(x, x1)
         x = self.decoder3(x, x1)
         # print(f'shape after decoder 3: {x.shape}')
 
@@ -238,7 +266,7 @@ class Decoder(nn.Module):
 
         return x
 
-class UVixLSTM_noAtt(nn.Module):
+class UVixLSTM_Att(nn.Module):
     def __init__(self, class_num=1, img_dim=256,
                      in_channels=3,
                      out_channels=64,

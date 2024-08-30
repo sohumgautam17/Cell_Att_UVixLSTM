@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ScheduledOptim():
@@ -8,6 +9,7 @@ class ScheduledOptim():
         self.n_warmup_steps = n_warmup_steps
         self.n_current_steps = 0
         self.init_lr = np.power(d_model, -0.5)
+        self.lr_track = []
 
     def step_and_update_lr(self):
         "Step with the inner optimizer"
@@ -27,6 +29,7 @@ class ScheduledOptim():
 
         self.n_current_steps += 1
         lr = self.init_lr * self._get_lr_scale()
+        self.lr_track.append(lr)
 
         for param_group in self._optimizer.param_groups:
             param_group['lr'] = lr
@@ -44,3 +47,5 @@ def early_stopping(validation_losses, patience=5, delta=0):
         return True
     
     return False
+
+
