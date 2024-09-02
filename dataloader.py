@@ -47,6 +47,7 @@ class CellDataset(Dataset):
         else:
             mask = torch.Tensor(mask.squeeze())
             mask = mask.unsqueeze(0)
+            mask = (mask > 0).float() # turns mask into 0 and 1
 
         # print(mask)
         # print(np.unique(mask))
