@@ -20,7 +20,7 @@ def one_hot_encoding(tensor, num_classes):
 
 ## Functionized Training, Val, and Test Loops
 
-def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
+def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss, jacc_loss, focal_loss):
     model.train()
     losses = 0
     len_of_batch = 0
@@ -52,7 +52,7 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
         elif args.loss == 'bce':
             loss_value = bce_loss(output, mask)
         elif args.loss == 'all':
-            loss_value = dc_loss(output, mask) + bce_loss(output, mask)
+            loss_value = dc_loss(output, mask) + bce_loss(output, mask) + jacc_loss(output, mask) + focal_loss(output, mask)
 
 
         loss_value.backward()
@@ -70,7 +70,7 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss):
     
     return average_loss
 
-def validater(model, val_loader, device, args, dc_loss, bce_loss):
+def validater(model, val_loader, device, args, dc_loss, bce_loss, jacc_loss, focal_loss):
     model.eval()
     losses = 0
     len_of_batch = 0
@@ -86,7 +86,7 @@ def validater(model, val_loader, device, args, dc_loss, bce_loss):
             elif args.loss == 'bce':
                 loss_value = bce_loss(output, mask)
             elif args.loss == 'all':
-                loss_value = dc_loss(output, mask) + bce_loss(output, mask)
+                loss_value = dc_loss(output, mask) + bce_loss(output, mask) + jacc_loss(output, mask) + focal_loss(output, mask)
 
 
             losses += loss_value.item()
