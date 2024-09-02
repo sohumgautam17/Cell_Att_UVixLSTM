@@ -16,6 +16,7 @@ import wandb
 from models.models import UNet
 from models.UVixLSTM_Att import UVixLSTM_Att
 from models.UVixLSTM_noAtt import UVixLSTM_noAtt
+from add_losses import FocalLoss, JaccardLoss
 # from models.AttTwoDUVixLSTM import AttUVixLSTM
 # from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
 
@@ -145,15 +146,18 @@ def main(args):
         if args.loss == 'dice':
             dc_loss = DiceLoss(mode='binary')
             bce_loss = None
-
+            jaccard_loss = None
+            focal_loss = None
         elif args.loss == 'bce':
             bce_loss = torch.nn.BCEWithLogitsLoss()
             dc_loss = None
-
+            jaccard_loss = None
+            focal_loss = None
         elif args.loss == 'all':
             bce_loss = torch.nn.BCEWithLogitsLoss()
             dc_loss = DiceLoss(mode='binary')
-            ####
+            jaccard_loss = JaccardLoss()
+            focal_loss = FocalLoss()
         
 
         # Train, Val loss tracking for visualization
@@ -165,11 +169,11 @@ def main(args):
         for epoch in range(args.epochs):
             
             all_epochs.append(epoch)
-            train_loss = trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss)
+            train_loss = trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss, jaccard_loss, focal_loss)
             print(f"Training - Epoch: {epoch+1},Train Loss: {train_loss}")
             train_losses.append(train_loss)
             
-            val_loss = validater(model, val_loader, device, args, dc_loss, bce_loss)
+            val_loss = validater(model, val_loader, device, args, dc_loss, bce_loss, jaccard_loss, focal_loss)
             print(f"Evaluation - Epoch: {epoch+1}, Val Loss: {val_loss}")
             val_losses.append(val_loss)
             
