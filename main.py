@@ -14,8 +14,9 @@ from segmentation_models_pytorch.losses import DiceLoss
 import wandb
 
 from models.models import UNet
-from models.UVixLSTM_Att import UVixLSTM_Att
-from models.UVixLSTM_noAtt import UVixLSTM_noAtt
+from models.UVixLSTM_GateAtt import UVixLSTM_Att
+from models.UVixLSTM_SelfAtt import UVixLSTM_noAtt
+from models.HoVerNet.HoVerNet import HoVerNet
 from add_losses import FocalLoss, JaccardLoss
 # from models.AttTwoDUVixLSTM import AttUVixLSTM
 # from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
@@ -98,7 +99,10 @@ def main(args):
         model = UVixLSTM_Att(class_num = 1, img_dim = 256, in_channels=3)
         model_hidden_size = 256
     elif args.model == 'xlstm':
-        model = UVixLSTM_noAtt(class_num =1, img_dim = 256, in_channels=3)
+        model = UVixLSTM_noAtt(class_num = 1, img_dim = 256, in_channels=3)
+        model_hidden_size = 256
+    elif args.model == "hovernet":
+        model = HoVerNet()
         model_hidden_size = 256
   
 

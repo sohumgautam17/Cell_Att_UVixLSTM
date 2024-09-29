@@ -260,7 +260,7 @@ class UVixLSTM_noAtt(nn.Module):
         x, x1, x2, x3 = self.encoder(x)
         # put the multihead slef attention layer here 
 
-        x = self.MHSA(x)
+        # x = self.MHSA(x)
     
 
         # print(x.size(), x1.size(), x2.size(), x3.size())
