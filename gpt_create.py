@@ -28,7 +28,7 @@ messages = [
     "content": initial_prompt}]
 
 store_dict = {}
-
+inst = 0
 while True:
     labels = str(input("Enter the labels for the image: "))
     next_prompt = f"Please analyze the image and provide a detailed explanation of the biological processes occurring in the tissue based on the image and segmentation mask. There are {labels} present in the image."
@@ -53,6 +53,13 @@ while True:
     messages.append({'role': 'assistant',
                         'content': f'{response.choices[0].message.content}'})
     print(response.choices[0].message.content)
-    time.sleep(5)  # Sleep for 5 seconds before sending the next prompt
     
     # store messages, img, labels, and response in a dictionary
+    store_dict[inst] = {
+    'response': response.choices[0].message.content,
+        'next_prompt': next_prompt,
+        'img_path' : img_path
+    }
+    time.sleep(5)  # Sleep for 5 seconds before sending the next prompt
+
+np.save('./gpt_runs.npy', store_dict)
