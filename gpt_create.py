@@ -16,7 +16,7 @@ client = OpenAI(api_key = oai_api_key)
 
 initial_prompt = """You are an expert in analyzing histological images and have a deep understanding of the underlying biological processes.
 I will provide you with an image that comprises of the original whole slide image on the left and the corresponding segmentation mask overlayed onto the original whole slide image on the right.
-The segmentation mask is color-coded where blue represents inflammatory cells, green represents connective/soft tissue cells, red represents dead cells, yellow represents epithelial cells, and grey represents background cells.
+The segmentation mask is color-coded where black represents neoplastic cells, red represents inflammatory cells, green represents connective/soft tissue cells, blue represents dead cells, yellow represents epithelial cells, and turquoise represents background.
 Your task is to analyze the image and provide a detailed explanation of the biological processes occurring in the tissue based on the segmentation mask.
 
 Context: I am creating a segmentation model and I want to incroporate textual features in to the model to improve the segmentation accuracy.
@@ -30,9 +30,9 @@ messages = [
 store_dict = {}
 
 while True:
-    labels = ...
-    next_prompt = ...
-    img_path = ...
+    labels = str(input("Enter the labels for the image: "))
+    next_prompt = f"Please analyze the image and provide a detailed explanation of the biological processes occurring in the tissue based on the image and segmentation mask. There are {labels} present in the image."
+    img_path = str(input("Enter the path to the image: "))
 
     base64_image = encode_image(img_path)
     messages.append(
