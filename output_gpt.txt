@@ -1,0 +1,57 @@
+Enter the labels for the image: background, neoplastic cells, inflammatory, epithelial
+Enter the path to the image: ./img_1.jpeg
+The segmentation mask reveals several key biological processes occurring in the tissue:
+
+1. **Neoplastic Cells (Black):** 
+   - These cells are indicative of abnormal growth, potentially cancerous. Their presence suggests a neoplastic process, where cells are proliferating uncontrollably. This can disrupt normal tissue architecture and function.
+
+2. **Inflammatory Cells (Red):**
+   - The presence of inflammatory cells indicates an immune response, possibly due to the neoplastic cells. This response can be part of the body's attempt to fight off abnormal cells or could be a reaction to tissue damage.
+
+3. **Epithelial Cells (Yellow):**
+   - Epithelial cells form the lining of surfaces and cavities. Their presence suggests that the tissue is part of an epithelial structure, such as skin or the lining of organs. They may be involved in forming barriers and facilitating absorption or secretion.
+
+4. **Background (Turquoise):**
+   - The background represents areas without significant cellular structures, possibly extracellular matrix or empty space in the tissue section.
+
+**Biological Implications:**
+- The interaction between neoplastic and inflammatory cells suggests a dynamic environment where the immune system is responding to abnormal cell growth.
+- The presence of epithelial cells indicates that the neoplastic process is occurring within or near an epithelial tissue, which is common in many cancers.
+- Understanding the spatial distribution and interaction of these cell types can provide insights into the progression of disease and potential therapeutic targets.
+Enter the labels for the image: neoplastic cells, connective/soft tissue cells, background
+Enter the path to the image: ./img_2.jpeg
+The segmentation mask highlights the following biological processes in the tissue:
+
+1. **Neoplastic Cells (Black):**
+   - These cells indicate abnormal growth, suggesting a neoplastic process, which could be benign or malignant. Their presence can disrupt normal tissue function and architecture, potentially leading to tumor formation.
+
+2. **Connective/Soft Tissue Cells (Green):**
+   - These cells provide structural support and are involved in maintaining the integrity of the tissue. They may also play a role in the response to neoplastic growth, possibly contributing to the formation of a stroma around the neoplastic cells.
+
+3. **Background (Turquoise):**
+   - The background represents areas without significant cellular structures, possibly extracellular matrix or empty space in the tissue section.
+
+**Biological Implications:**
+- The interaction between neoplastic and connective tissue cells suggests a complex microenvironment where the neoplastic cells may be influencing or being influenced by the surrounding stroma.
+- The connective tissue may be involved in supporting the neoplastic growth or attempting to contain it.
+- Understanding these interactions is crucial for insights into tumor progression and potential therapeutic interventions.
+Enter the labels for the image: inflammatory, neoplastic cells, epithelial, background
+Enter the path to the image: ./img_3.jpeg
+The segmentation mask reveals the following biological processes in the tissue:
+
+1. **Neoplastic Cells (Black):**
+   - These cells indicate abnormal growth, suggesting a neoplastic process. This could be indicative of a tumor, where cells are proliferating uncontrollably, potentially disrupting normal tissue function.
+
+2. **Inflammatory Cells (Red):**
+   - The presence of inflammatory cells suggests an immune response, likely triggered by the neoplastic cells. This response can be part of the body's attempt to control or eliminate the abnormal cells, or it could be a reaction to tissue damage caused by the neoplastic growth.
+
+3. **Epithelial Cells (Yellow):**
+   - Epithelial cells form protective barriers and are involved in absorption and secretion. Their presence indicates that the neoplastic process is occurring within or near an epithelial tissue, which is common in many types of cancer.
+
+4. **Background (Turquoise):**
+   - The background represents areas without significant cellular structures, possibly extracellular matrix or empty space in the tissue section.
+
+**Biological Implications:**
+- The interaction between neoplastic and inflammatory cells suggests a dynamic environment where the immune system is actively responding to abnormal cell growth.
+- The presence of epithelial cells indicates that the neoplastic process is affecting or originating from epithelial tissue, which is significant for understanding the type and progression of the disease.
+- Analyzing these interactions can provide insights into tumor behavior and potential therapeutic targets, as well as the effectiveness of the immune response.
