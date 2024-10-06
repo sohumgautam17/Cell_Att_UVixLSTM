@@ -12,6 +12,7 @@ from tqdm import tqdm
 start_time = time.process_time()
 
 def main():    
+    print("hello")
     images, masks = load_pannuke()
 
     data = {
@@ -26,8 +27,9 @@ def main():
         'test_patched_images': [],
         'test_patched_masks': []
     }
+    print('hello1')
 
-    for image in images:
+    for image in tqdm(images):
         data['original_image'].append(image)
     print("Length of images_list:", len(data['original_image']))
     print("Shape of first element in images_list:", data['original_image'][0].shape)
@@ -36,7 +38,9 @@ def main():
     print("Shape of first element in mask_list:", data['mask'][0].shape)
 
 
-    aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
+    # aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
+    aug_images, aug_masks = data['original_image'], data['mask']
+
 
     data['aug_images'].extend(aug_images) # data['original_image']
     data['aug_masks'].extend(aug_masks) # data['mask']
@@ -61,10 +65,15 @@ def main():
     print(len(data['val_patched_images']))
     print(len(data['test_patched_images']))
 
+
+    print(len(data['train_patched_images']))
+    print(len(data['val_patched_images']))
+    print(len(data['test_patched_images']))
+
     end_time = time.process_time()
     print(float(end_time-start_time))
     
-    np.save('./pannuke_fold1+2_more_augs', data)
+    np.save('./pannuke_6c', data)
 
 if __name__ == "__main__":
     print('Preprocessing Data...')

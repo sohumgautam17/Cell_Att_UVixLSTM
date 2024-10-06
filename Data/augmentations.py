@@ -66,13 +66,13 @@ def Rotate():
 
     ])
 
-def Elastic_Transform():
-    return A.Compose({
-        A.Resize(256, 256),
-        A.ElasticTransform(alpha=1, sigma=50, alpha_affine=50, p=1.0),
-        A.Resize(256, 256),
+# def Elastic_Transform():
+#     return A.Compose({
+#         A.Resize(256, 256),
+#         A.ElasticTransform(alpha=1, sigma=50, alpha_affine=50, p=1.0),
+#         A.Resize(256, 256),
 
-    })
+#     })
 
 
 def apply_aug(images, masks):
@@ -85,9 +85,9 @@ def apply_aug(images, masks):
     gaussian_noise = Gaussian_Noise()
     zoom_blur = Zoom_Blur()
     rotate = Rotate()
-    elastic = Elastic_Transform()
+    # elastic = Elastic_Transform()
 
-    all_augs = [horiz_trans,vert_trans,random_crop, brightness, contrast, gaussian_noise, zoom_blur, rotate, elastic]
+    all_augs = [horiz_trans,vert_trans,random_crop, brightness, contrast, gaussian_noise, zoom_blur, rotate] # remove elastic
 
     aug_images = []
     aug_masks = []
