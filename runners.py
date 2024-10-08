@@ -1,22 +1,9 @@
 from tqdm import tqdm
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
-
-def one_hot_encoding(tensor, num_classes):
-    """ Convert tensor to one-hot encoding. """
-    tensor = tensor.to(torch.int64)  # Ensure tensor is of type int64
-    shape = list(tensor.shape)
-    shape.append(num_classes)
-    one_hot = torch.zeros(shape, device=tensor.device)
-    # Expand tensor dimensions and use scatter_
-    one_hot.scatter_(1, tensor.unsqueeze(1), 1)
-    return one_hot
-
 
 ## Functionized Training, Val, and Test Loops
 
@@ -29,23 +16,7 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss, jac
         optimizer.zero_grad()
         img, mask, _ = batch
         img, mask = img.to(device), mask.to(device)
-        # print(img)        
-        ####vizualising 
-        # img_cpu = img[0].cpu().numpy()  # Move the tensor to the CPU and convert it to a NumPy array
-        # img_cpu = img_cpu.transpose(1, 2, 0)  # Rearrange dimensions if necessary (C, H, W) -> (H, W, C)
-        # plt.imshow(img_cpu)
-        # plt.axis('off')  # Turn off axis
-        # plt.savefig(f'./train_img.png', bbox_inches='tight', pad_inches=0)
-        # plt.close()  # Close the figure to free memory
-
-        # mask_cpu = mask[0].cpu().numpy()
-        # mask_cpu = mask_cpu.transpose(1, 2, 0)  # Rearrange dimensions if necessary (C, H, W) -> (H, W, C)
-        # plt.imshow(mask_cpu)
-        # plt.axis('off')
-        # plt.savefig(f'./train_mask.png', bbox_inches='tight', pad_inches=0)
-        # plt.close()  # Close the figure to free memory
-        ####
-
+        mask = mask.permute(0, 4, 2, 3, 1).contiguous().squeeze(-1)
         output = model(img)
         if args.loss == 'dice':
             loss_value = dc_loss(output, mask)
@@ -53,13 +24,11 @@ def trainer(model, train_loader, optimizer, device, args, dc_loss, bce_loss, jac
             loss_value = bce_loss(output, mask)
         elif args.loss == 'all':
             loss_value = dc_loss(output, mask) + bce_loss(output, mask) + jacc_loss(output, mask) + focal_loss(output, mask)
-
-
         loss_value.backward()
         optimizer.step_and_update_lr()
-        # optimizer.step()
-
         losses += loss_value.item()
+        print(f'Loss: {loss_value.item()}')
+        input()
         len_of_batch += 1
         
         if args.dev:
@@ -79,6 +48,7 @@ def validater(model, val_loader, device, args, dc_loss, bce_loss, jacc_loss, foc
         for batch in tqdm(val_loader, desc = 'Vaidating'):
             img, mask, _ = batch
             img, mask = img.to(device), mask.to(device)
+            mask = mask.permute(0, 4, 2, 3, 1).contiguous().squeeze(-1)
 
             output = model(img)
             if args.loss == 'dice':
@@ -87,8 +57,6 @@ def validater(model, val_loader, device, args, dc_loss, bce_loss, jacc_loss, foc
                 loss_value = bce_loss(output, mask)
             elif args.loss == 'all':
                 loss_value = dc_loss(output, mask) + bce_loss(output, mask) + jacc_loss(output, mask) + focal_loss(output, mask)
-
-
             losses += loss_value.item()
             len_of_batch += 1
             
@@ -141,6 +109,7 @@ def tester(model, test_loader, device, args):
             img, mask, _ = batch
             img, mask = img.to(device), mask.to(device)
             output = model(img)
+            mask = mask.permute(0, 4, 2, 3, 1).contiguous().squeeze(-1)
             
             output = torch.sigmoid(output)  # Assuming sigmoid for binary classification
             output = (output > 0.5).float() # True is > 0.5 else false -> True -> 1.0 False -> 0.0
