@@ -104,6 +104,8 @@ def main(args):
     elif args.model == "hovernet":
         model = HoVerNet()
         model_hidden_size = 256
+
+    ### ABOVE CHANGE CLASS_NUM TO 6 for 6 classes
   
 
     model = model.to(device)
