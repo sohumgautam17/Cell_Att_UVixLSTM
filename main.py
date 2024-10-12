@@ -182,9 +182,8 @@ def main(args):
             jaccard_loss = None
             focal_loss = None
         elif args.loss == 'all':
-            # bce_loss = torch.nn.BCEWithLogitsLoss()
-            bce_loss = torch.nn.CrossEntropyLoss()
-            dc_loss = DiceLoss(mode='multiclass')
+            bce_loss = torch.nn.BCEWithLogitsLoss()
+            dc_loss = DiceLoss(mode='multilabel')
             jaccard_loss = JaccardLoss()
             focal_loss = FocalLoss()
 
