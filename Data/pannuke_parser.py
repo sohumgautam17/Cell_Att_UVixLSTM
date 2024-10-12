@@ -12,7 +12,6 @@ from tqdm import tqdm
 start_time = time.process_time()
 
 def main():    
-    print("hello")
     images, masks = load_pannuke()
 
     data = {
@@ -20,6 +19,8 @@ def main():
         "mask": [],
         'aug_images': [],
         'aug_masks': [],
+        'all_images': [],
+        'all_masks': [],
         'train_patched_images': [],
         'train_patched_masks': [],
         'val_patched_images': [],
@@ -36,30 +37,33 @@ def main():
     data['mask'].extend(masks)
     print("Length of mask_list:", len(data['mask']))
     print("Shape of first element in mask_list:", data['mask'][0].shape)
+    
+    aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
 
-
-    # aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
-    aug_images, aug_masks = data['original_image'], data['mask']
-
+    print(f'length of aug_images: {len(aug_images)}')
 
     data['aug_images'].extend(aug_images) # data['original_image']
     data['aug_masks'].extend(aug_masks) # data['mask']
+    data['all_images'].extend(data['aug_images'])
+    data['all_images'].extend(data['original_image'])
+    data['all_masks'].extend(data['aug_masks'])
+    data['all_masks'].extend(data['mask'])
 
+    # print(f'Length of all images : {len(data['all_images'])}')
 
-    total_patch_images = len(data['aug_images'])
+    total_patch_images = len(data['all_masks'])
     print(total_patch_images)
     train_cutoff = int(0.85 * total_patch_images)
     print(f'train_cutoff: {train_cutoff}')
     val_cutoff = int(0.93 * total_patch_images)
     print(f'train_cutoff: {val_cutoff}')
-
-
-    data['train_patched_images'] = data['aug_images'][:train_cutoff]
-    data['train_patched_masks'] = data['aug_masks'][:train_cutoff]
-    data['val_patched_images'] = data['aug_images'][train_cutoff:val_cutoff] 
-    data['val_patched_masks'] = data['aug_masks'][train_cutoff:val_cutoff] 
-    data['test_patched_images'] = data['aug_images'][val_cutoff:]
-    data['test_patched_masks'] = data['aug_masks'][val_cutoff:] 
+    
+    data['train_patched_images'] = data['all_images'][:train_cutoff]
+    data['train_patched_masks'] = data['all_masks'][:train_cutoff]
+    data['val_patched_images'] = data['all_images'][train_cutoff:val_cutoff] 
+    data['val_patched_masks'] = data['all_masks'][train_cutoff:val_cutoff] 
+    data['test_patched_images'] = data['all_images'][val_cutoff:]
+    data['test_patched_masks'] = data['all_masks'][val_cutoff:] 
 
     print(len(data['train_patched_images']))
     print(len(data['val_patched_images']))
@@ -73,7 +77,7 @@ def main():
     end_time = time.process_time()
     print(float(end_time-start_time))
     
-    np.save('./pannuke_6c', data)
+    np.save('./pannuke_6c_augs', data)
 
 if __name__ == "__main__":
     print('Preprocessing Data...')

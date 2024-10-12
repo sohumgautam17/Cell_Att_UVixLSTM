@@ -1,6 +1,6 @@
 import torch
 torch.set_num_threads(2)
-# import argparse
+import argparse
 
 from torch.utils.data import DataLoader
 import gc
@@ -26,7 +26,29 @@ from add_losses import FocalLoss, JaccardLoss
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
 from dataloader import CellDataset
-    
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Initialize Hyperparameters')
+    parser.add_argument('--lr', type = float, default = 1e-4, help='Please choose the learning rate')
+    parser.add_argument('--patience', type = int, default = 5, help = 'Please choose the patience of the early stopper')
+    parser.add_argument('--device', type = str, default = 'cuda', help = 'Please choose the type of device' )
+    parser.add_argument('--dataset', type = str, default = './Data/pannuke_6c.npy', help = 'Please choose a dataset' )
+    parser.add_argument('--warmup', type = int, default = 2000, help = 'Please choose the number of warmup steps for the optimizer' )
+    parser.add_argument('--epochs', type = int, default = 100, help = 'Please choose the number of epochs' )
+    parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
+    parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
+    parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
+    parser.add_argument('--patch_size', type=int, default=256, help='please enter patch size')
+    parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
+    parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
+    parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
+    parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
+    parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
+    parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
+
+    return parser.parse_args()
+
 def ensure_directory_exists(directory_path):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
@@ -96,10 +118,10 @@ def main(args):
         model = UNet(n_channels=3, n_classes=1, bilinear=True)
         model_hidden_size = 1024 
     elif args.model == 'attxlstm':
-        model = UVixLSTM_Att(class_num = 1, img_dim = 256, in_channels=3)
+        model = UVixLSTM_Att(class_num = 6, img_dim = 256, in_channels=3)
         model_hidden_size = 256
     elif args.model == 'xlstm':
-        model = UVixLSTM_noAtt(class_num = 1, img_dim = 256, in_channels=3)
+        model = UVixLSTM_noAtt(class_num = 6, img_dim = 256, in_channels=3)
         model_hidden_size = 256
     elif args.model == "hovernet":
         model = HoVerNet()
@@ -150,7 +172,7 @@ def main(args):
             betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)'''
         
         if args.loss == 'dice':
-            dc_loss = DiceLoss(mode='binary')
+            dc_loss = DiceLoss(mode='mutliclass')
             bce_loss = None
             jaccard_loss = None
             focal_loss = None
@@ -160,11 +182,11 @@ def main(args):
             jaccard_loss = None
             focal_loss = None
         elif args.loss == 'all':
-            bce_loss = torch.nn.BCEWithLogitsLoss()
-            dc_loss = DiceLoss(mode='binary')
+            # bce_loss = torch.nn.BCEWithLogitsLoss()
+            bce_loss = torch.nn.CrossEntropyLoss()
+            dc_loss = DiceLoss(mode='multiclass')
             jaccard_loss = JaccardLoss()
             focal_loss = FocalLoss()
-        
 
         # Train, Val loss tracking for visualization
         train_losses = []
