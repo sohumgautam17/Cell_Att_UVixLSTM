@@ -10,9 +10,12 @@ with open('./.huggingface/api_keys.txt', 'r') as file:
         file_contents = file.readlines() ### I WILL PROVIDE THIS API KEY
         
 oai_api_key = file_contents[1]
-print(oai_api_key)
+os.environ["LITELLM_API_KEY"] = oai_api_key
 
-client = OpenAI(api_key = oai_api_key)
+client = openai.OpenAI(
+  api_key=os.environ.get("LITELLM_API_KEY"),
+  base_url="https://cmu.litellm.ai",
+)
 
 initial_prompt = """You are an expert in analyzing histological images and have a deep understanding of the underlying biological processes.
 I will provide you with an image that comprises of the original whole slide image on the left and the corresponding segmentation mask overlayed onto the original whole slide image on the right.
