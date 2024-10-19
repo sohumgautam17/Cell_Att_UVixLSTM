@@ -23,6 +23,7 @@ pannuke_6c.npy
 pannuke_6c_augs.npy
 
 runs/
+gpt_runs/
 *.tif
 *.png
 *.xml
