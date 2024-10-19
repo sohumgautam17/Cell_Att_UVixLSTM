@@ -196,6 +196,43 @@ def load_pannuke(subset_size=None):
     print("Masks shape:", all_masks.shape)
     print("Masks dtype:", all_masks.dtype)
 
-    return all_images, all_masks   
+    def overlap_mask(all_masks):
+        if all_masks.ndim != 4:
+            raise ValueError("Expected masks to be 4-dimensional, but got {}".format(all_masks.ndim))
+
+        num_images, height, width, num_classes = all_masks.shape
+        print(f'num images {num_images}')
+        new_masks = np.zeros((num_images, height, width), dtype=int)  
+
+
+        for class_index in range(num_classes):
+            print(f"Processing class index: {class_index}")
+            print(f"Shape of masks[..., {class_index}]:", all_masks[..., class_index].shape)
+
+            # Create a boolean mask where the class is present
+            boolean_mask = all_masks[..., class_index] > 0
+            print(f'boolean_mask unique {np.unique(boolean_mask)}')
+
+            new_masks[boolean_mask] = class_index + 1  
+            new_masks[new_masks == 6] = 0
+
+            print(f'new_masks unique {np.unique(new_masks)}')
+
+        new_masks = new_masks[:, :, :, np.newaxis] 
+        zero_mask_indices = np.where(new_masks == 0)
+        assert np.all(new_masks != 6)
+
+        
+        print(f"Shape of combined_mask: {new_masks.shape}")
+        return new_masks
+
+    overlapped_masks = overlap_mask(all_masks)
+    # zero_mask_indices = np.where(overlapped_masks == 0)
+    # assert np.all(overlapped_masks != 0)
+
+    print(f'overlapped_masks :{np.unique(overlapped_masks)}')
+    print("Shape of overlapped:", overlapped_masks.shape)
+    
+    return all_images, overlapped_masks
 
 
