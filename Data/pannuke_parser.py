@@ -13,6 +13,8 @@ start_time = time.process_time()
 
 def main():    
     images, masks = load_pannuke()
+    np.save('./test_mask_overlap', masks)
+    # input()
 
     data = {
         "original_image": [],
@@ -28,22 +30,20 @@ def main():
         'test_patched_images': [],
         'test_patched_masks': []
     }
-    print('hello1')
-
-    for image in tqdm(images):
-        data['original_image'].append(image)
+    
+    data['original_image'].extend(images)
     print("Length of images_list:", len(data['original_image']))
     print("Shape of first element in images_list:", data['original_image'][0].shape)
     data['mask'].extend(masks)
     print("Length of mask_list:", len(data['mask']))
     print("Shape of first element in mask_list:", data['mask'][0].shape)
     
-    aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
+    # aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
 
-    print(f'length of aug_images: {len(aug_images)}')
+    # print(f'length of aug_images: {len(aug_images)}')
 
-    data['aug_images'].extend(aug_images) # data['original_image']
-    data['aug_masks'].extend(aug_masks) # data['mask']
+    # data['aug_images'].extend(aug_images) # data['original_image'] 
+    # data['aug_masks'].extend(aug_masks) # data['mask'] 
     data['all_images'].extend(data['aug_images'])
     data['all_images'].extend(data['original_image'])
     data['all_masks'].extend(data['aug_masks'])
@@ -69,15 +69,16 @@ def main():
     print(len(data['val_patched_images']))
     print(len(data['test_patched_images']))
 
+    #SAVE WITH THE FILE NAME!!!!
 
-    print(len(data['train_patched_images']))
-    print(len(data['val_patched_images']))
-    print(len(data['test_patched_images']))
+    # print(len(data['train_patched_images']))
+    # print(len(data['val_patched_images']))
+    # print(len(data['test_patched_images']))
 
     end_time = time.process_time()
     print(float(end_time-start_time))
     
-    np.save('./pannuke_6c_augs', data)
+    np.save('./pannuke_6c', data)
 
 if __name__ == "__main__":
     print('Preprocessing Data...')
