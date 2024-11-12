@@ -22,6 +22,9 @@ MoNuSeg_Images/
 pannuke_6c.npy
 pannuke_6c_augs.npy
 
+Data/Data
+
+
 runs/
 gpt_runs/
 *.tif

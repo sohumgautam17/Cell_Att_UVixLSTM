@@ -4,7 +4,7 @@ import argparse
 
 from torch.utils.data import DataLoader
 import gc
-from utils import get_args
+# from utils import get_args
 from torch.optim import Adam
 import torch.nn as nn
 import numpy as np
@@ -16,7 +16,6 @@ import wandb
 from models.models import UNet
 from models.UVixLSTM_GateAtt import UVixLSTM_Att
 from models.UVixLSTM_SelfAtt import UVixLSTM_noAtt
-from models.HoVerNet.HoVerNet import HoVerNet
 from add_losses import FocalLoss, JaccardLoss
 # from models.AttTwoDUVixLSTM import AttUVixLSTM
 # from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
@@ -182,7 +181,8 @@ def main(args):
             jaccard_loss = None
             focal_loss = None
         elif args.loss == 'all':
-            bce_loss = torch.nn.BCEWithLogitsLoss()
+            # bce_loss = torch.nn.BCEWithLogitsLoss()
+            bce_loss = torch.nn.CrossEntropyLoss()
             dc_loss = DiceLoss(mode='multilabel')
             jaccard_loss = JaccardLoss()
             focal_loss = FocalLoss()
@@ -205,7 +205,7 @@ def main(args):
             val_losses.append(val_loss)
             
             model_state_dict = model.state_dict()
-                
+            
             checkpoint = {
                 'model' : model_state_dict,
                 'config_file' : 'config',

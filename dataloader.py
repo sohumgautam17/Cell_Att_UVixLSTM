@@ -1,10 +1,13 @@
 import torch
+
 from torch.utils.data import Dataset
 import numpy as np
 from torchvision import transforms
 from PIL import Image
-from utils import get_args  # Import the args object from main.py
-args = get_args()
+import glob
+
+
+import json
 
 # Create custom PyTorch for files 
 class CellDataset(Dataset):
@@ -40,17 +43,47 @@ class CellDataset(Dataset):
         img = self.imgs[index]
         mask = self.masks[index]
         trans_img = self.transform(Image.fromarray(img))
-
-        
-        if args.dataset == './Data/all_data.npy':
-            mask = self.mask_transform(mask)
-        else:
-            mask = torch.Tensor(mask.squeeze())
-            mask = mask.unsqueeze(0)
-            mask = (mask > 0).float() # turns mask into 0 and 1
-
-        # print(mask)
-        # print(np.unique(mask))
-        # input('testing')
-
+        # print('before', np.unique(mask))
+        # mask = mask-1
+        # print('after', np.unique(mask))
+        assert mask.min() >= 0 and mask.max() <= 5
+        mask = torch.tensor(mask, dtype=torch.int64) 
+        mask = mask.squeeze(2).unsqueeze(0)
         return trans_img, mask, img
+
+
+class ECGCLIPPretrain(Dataset):
+    def __init__(self, all_signals_path, all_texts_path, clip_tokenizer = None, processor = None, max_length=77):
+        self.signals_path = glob.glob(all_signals_path)[:100]
+        self.texts_path = glob.glob(all_texts_path)[:100]
+        self.clip_tokenizer = clip_tokenizer
+        self.processor = processor
+        self.max_length = max_length
+
+        assert len(self.signals_path) == len(self.texts_path), "The number of images and texts should match."
+
+    def __len__(self):
+        return len(self.signals_path)
+
+    def __getitem__(self, idx):
+        signal_path = self.signals_path[idx]
+        signal_image = Image.open(signal_path).convert("RGB") # sing images are png
+
+        with open(self.texts_path[idx], 'r') as f:
+            text = f.read().strip()
+
+        inputs_text = self.processor(text=text, return_tensors="pt", padding='max_length', 
+                                     truncation=True, max_length=self.max_length)
+
+        inputs_image = self.processor(images=signal_image, return_tensors="pt")
+
+        inputs = {
+            'input_ids': inputs_text.input_ids.squeeze(0),  # Remove batch dimension
+            'attention_mask': inputs_text.attention_mask.squeeze(0),  # Remove batch dimension
+            'pixel_values': inputs_image.pixel_values.squeeze(0)  # Remove batch dimension
+        }
+
+
+        # print(inputs.values())
+
+        return inputs
