@@ -6,9 +6,6 @@ import base64
 import time
 import os
 
-# oai_api_key = os.getenv('OAI_API_KEY')  # Fetch the API key from the environment variable
-# print(oai_api_key)
-
 with open('apikey.txt', 'r') as file:
     oai_api_key = file.read().strip()
 
@@ -17,7 +14,6 @@ client = OpenAI(
     base_url="https://cmu.litellm.ai",
 )
 
-# system prompt (be exact)
 initial_prompt = """You are an expert in analyzing histological images with a deep understanding of the underlying biological processes and physical characteristics of cellular structures.
 I will provide you with an image that includes the original whole slide image on the left and the corresponding segmentation mask overlaid onto the original whole slide image on the right.
 In this segmentation mask, each color represents a different cell type: black for neoplastic cells, red for inflammatory cells, green for connective/soft tissue cells, blue for dead cells, yellow for epithelial cells, and cyan for the background.
@@ -36,7 +32,6 @@ messages = [
 
 store_dict = {}
 inst = 0
-# while True:
 
 def encode_image(image_path):
     try:
@@ -48,9 +43,7 @@ def encode_image(image_path):
 
 def forward(img_path):
 
-    # labels = str(input("Enter the labels for the image: ")) # The model can distinguish without the labels being told to it
     next_prompt = f"Please analyze the image and provide a detailed explanation of the biological processes occurring in the tissue based on the image and segmentation mask. The labels can be found in the legend of each image and determine which cells/classes are in the image."
-    # There are {labels} present in the image.
     base64_image = encode_image(img_path)
     messages.append(
                     {'role': 'user', 
@@ -71,13 +64,12 @@ def forward(img_path):
                         'content': f'{response.choices[0].message.content}'})
     # print(response.choices[0].message.content)
 
-    # store messages, img, labels, and response in a dictionary
     store_dict[inst] = {
     'response': response.choices[0].message.content,
         'next_prompt': next_prompt,
         'img_path' : img_path
     }
-    time.sleep(3)  # Sleep for 5 seconds before sending the next prompt
+    time.sleep(3) 
     return store_dict
 
 def main():
@@ -91,7 +83,7 @@ def main():
 
         # save it 
         with open(text_path, 'w') as file:
-            file.write(text[inst]['response'])  # Replace with GPT-generated text if available
+            file.write(text[inst]['response']) 
 
 
 if __name__ == "__main__":
