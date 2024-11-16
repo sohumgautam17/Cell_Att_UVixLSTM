@@ -6,8 +6,11 @@ import base64
 import time
 import os
 
-oai_api_key = os.getenv('OAI_API_KEY')  # Fetch the API key from the environment variable
-print(oai_api_key)
+# oai_api_key = os.getenv('OAI_API_KEY')  # Fetch the API key from the environment variable
+# print(oai_api_key)
+
+with open('apikey.txt', 'r') as file:
+    oai_api_key = file.read().strip()
 
 client = OpenAI(
     api_key=oai_api_key,
@@ -15,13 +18,16 @@ client = OpenAI(
 )
 
 # system prompt (be exact)
-initial_prompt = """You are an expert in analyzing histological images and have a deep understanding of the underlying biological processes.
-I will provide you with an image that comprises of the original whole slide image on the left and the corresponding segmentation mask overlayed onto the original whole slide image on the right.
-The segmentation mask is color-coded where black represents neoplastic cells, red represents inflammatory cells, green represents connective/soft tissue cells, blue represents dead cells, yellow represents epithelial cells, and turquoise represents background.
-Your task is to analyze the image and provide a detailed explanation of the biological processes occurring in the tissue based on the segmentation mask.
+initial_prompt = """You are an expert in analyzing histological images with a deep understanding of the underlying biological processes and physical characteristics of cellular structures.
+I will provide you with an image that includes the original whole slide image on the left and the corresponding segmentation mask overlaid onto the original whole slide image on the right.
+In this segmentation mask, each color represents a different cell type: black for neoplastic cells, red for inflammatory cells, green for connective/soft tissue cells, blue for dead cells, yellow for epithelial cells, and cyan for the background.
 
-Context: I am creating a segmentation model and I want to incroporate textual features in to the model to improve the segmentation accuracy.
-"""
+Your task is to analyze both the biological processes and physical attributes (large focus on physical attributes in the specific image) in the tissue based on the segmentation mask. Specifically:
+
+Describe the distribution, relative density, and spatial arrangement of each cell type.
+Note the typical shapes and sizes of cells in each category, especially where clustering or unusual formations occur.
+Observe any color variations or gradients in the original image that may suggest changes in cell composition, health, or metabolic activity.
+Context: I am creating a segmentation model and want to incorporate textual features to improve segmentation accuracy."""
 
 conversation_history = ""
 messages = [
@@ -71,13 +77,13 @@ def forward(img_path):
         'next_prompt': next_prompt,
         'img_path' : img_path
     }
-    time.sleep(2)  # Sleep for 5 seconds before sending the next prompt
+    time.sleep(3)  # Sleep for 5 seconds before sending the next prompt
     return store_dict
 
 def main():
     image_files, text_files = load_paired('./Data/Data/joined_images/', './Data/Data/texts/')
 
-    for image, text_path in zip(image_files, text_files):
+    for image, text_path in zip(image_files[187:], text_files[187:]):
         print(f'Image File: {image} Text File Saved To: {text_path}')
 
         # generate text
