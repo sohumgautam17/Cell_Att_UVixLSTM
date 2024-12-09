@@ -62,7 +62,7 @@ def main():
     train_cutoff = int(0.85 * total_patch_images)
     print(f'train_cutoff: {train_cutoff}')
     val_cutoff = int(0.93 * total_patch_images)
-    print(f'train_cutoff: {val_cutoff}')
+    print(f'validation_cutoff: {val_cutoff}')
     
     data['train_patched_images'] = data['all_images'][:train_cutoff]
     data['train_patched_masks'] = data['all_masks'][:train_cutoff]
@@ -77,11 +77,11 @@ def main():
 
     def save_images_and_masks(data, gpt_load=bool):
         if gpt_load:
+            print("Saving images, masks, and generating text files...")
             ensure_directory_exists('./Data/masks/')
             ensure_directory_exists('./Data/images/')
             ensure_directory_exists('./Data/joined_images/')
             ensure_directory_exists('./Data/texts/')
-            print("Saving images, masks, and generating text files...")
 
             for idx, (image, mask) in enumerate(zip(data['all_images'], data['all_masks'])):
                 image_path = f'./Data/images/image_{idx}.png'
@@ -153,10 +153,13 @@ def main():
                 print(f"Saved image_{idx}.png, mask_{idx}.png, join_{idx}.png, and text_{idx}.txt")
 
             print("All images, masks, and text files saved.")
+        
+        else:
+            print('Not saving images, masks for CLIP')
 
     end_time = time.process_time()
     print(float(end_time-start_time))
-    save_images_and_masks(data, gpt_load=True)
+    save_images_and_masks(data, gpt_load=False)
     np.save('./pannuke_6c', data)
 
 if __name__ == "__main__":

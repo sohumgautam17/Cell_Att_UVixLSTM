@@ -41,6 +41,7 @@ class CellDataset(Dataset):
     # Load a sample at a given index
     def __getitem__(self, index):
         img = self.imgs[index]
+        img = (img * 255).astype(np.uint8)
         mask = self.masks[index]
         trans_img = self.transform(Image.fromarray(img))
         # print('before', np.unique(mask))
@@ -48,14 +49,15 @@ class CellDataset(Dataset):
         # print('after', np.unique(mask))
         assert mask.min() >= 0 and mask.max() <= 5
         mask = torch.tensor(mask, dtype=torch.int64) 
-        mask = mask.squeeze(2).unsqueeze(0)
+        mask = mask.squeeze(2).unsqueeze(0) # from 256 256 c --> c 256 256 
+
         return trans_img, mask, img
 
 
 class ECGCLIPPretrain(Dataset):
     def __init__(self, all_signals_path, all_texts_path, clip_tokenizer = None, processor = None, max_length=77):
-        self.signals_path = glob.glob(all_signals_path)[:100]
-        self.texts_path = glob.glob(all_texts_path)[:100]
+        self.signals_path = glob.glob(all_signals_path)[:1727]
+        self.texts_path = glob.glob(all_texts_path)[:1727]
         self.clip_tokenizer = clip_tokenizer
         self.processor = processor
         self.max_length = max_length

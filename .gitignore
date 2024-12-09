@@ -41,3 +41,4 @@ downloads/
 
 # misc
 __pycache__/process_data.cpython-38.pyc
+.huggingface

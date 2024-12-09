@@ -4,7 +4,6 @@ import argparse
 
 from torch.utils.data import DataLoader
 import gc
-# from utils import get_args
 from torch.optim import Adam
 import torch.nn as nn
 import numpy as np
@@ -13,14 +12,10 @@ import matplotlib.pyplot as plt
 from segmentation_models_pytorch.losses import DiceLoss
 import wandb
 
-from models.models import UNet
 from models.UVixLSTM_GateAtt import UVixLSTM_Att
 from models.UVixLSTM_SelfAtt import UVixLSTM_noAtt
+from models.clip_xlstm import clip_xlstm
 from add_losses import FocalLoss, JaccardLoss
-# from models.AttTwoDUVixLSTM import AttUVixLSTM
-# from models.AttTwoDUVixLSTM2 import AttUVixLSTM2
-
-# from postprocess.watershed import inference_watershed
 
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
@@ -122,9 +117,10 @@ def main(args):
     elif args.model == 'xlstm':
         model = UVixLSTM_noAtt(class_num = 6, img_dim = 256, in_channels=3)
         model_hidden_size = 256
-    elif args.model == "hovernet":
-        model = HoVerNet()
+    elif args.model == "clip_xlstm":
+        model = clip_xlstm()
         model_hidden_size = 256
+
 
     ### ABOVE CHANGE CLASS_NUM TO 6 for 6 classes
   
