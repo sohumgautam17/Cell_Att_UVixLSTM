@@ -27,7 +27,7 @@ def freeze_clip_weights(model):
             params.requires_grad = False # gradients dont need to be computed
 
 def print_model_summary(model):
-    total_params = sum(p.numel() for p in model.parameters()) # total elements
+    total_params = sum(p.f() for p in model.parameters()) # total elements
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad) # trainable elements
     print(f"\nModel Summary:")
     print(f"Total parameters: {total_params:,}")
@@ -85,39 +85,9 @@ class clip_encoder(nn.Module):
 
         with torch.no_grad():
             outputs = model(**inputs)
+            print(outputs.keys())
             return outputs['image_embeds']  # (1, 512)
-# class clip_encoder(nn.Module):
-#     def __init__(self, checkpoint_path, device):
-#         super().__init__()
-#         self.clip_model = clip_load(checkpoint_path, device)
-#         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")   
 
-#     def forward(self, x):
-#         model = self.clip_model
-#         freeze_clip_weights(model)
-
-#         signal_image = Image.open(x['image']).convert("RGB")
-
-#         with open(x['text'], 'r') as f:
-#             text = f.read().strip()
-
-#         processor = self.processor
-#         inputs_text = processor(text=text, return_tensors="pt", padding='max_length', 
-#                             truncation=True, max_length=77)
-#         inputs_image = processor(images=signal_image, return_tensors="pt")
-
-#         inputs = {
-#             'input_ids': inputs_text.input_ids.to(device),
-#             'pixel_values': inputs_image.pixel_values.to(device)
-#         }
-
-#         # print_model_summary(model)
-        
-#         with torch.no_grad():
-#             outputs = model(**inputs)
-#             # print("Output keys:", outputs.keys())
-#             print(outputs['image_embeds'].shape)
-#             return outputs['image_embeds'] # (1, 512)
 
 class encoder_block(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, base_width=64):
@@ -128,7 +98,7 @@ class encoder_block(nn.Module):
             nn.BatchNorm2d(out_channels)
         )
 
-        width = int(out_channels * (base_width / 64))
+        width = int(out_channels * (base_width / 64)) 
 
         self.conv1 = nn.Conv2d(in_channels, width, kernel_size=1, stride=1, bias=False)
         self.norm1 = nn.BatchNorm2d(width)
@@ -377,7 +347,7 @@ batch = {
 }
 
 model = clip_xlstm(
-    checkpoint_path='../runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
+    checkpoint_path='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
     device='cuda' if torch.cuda.is_available() else 'cpu',
     shape2=512,
     shape3=256,

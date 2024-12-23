@@ -40,6 +40,7 @@ def get_args():
     parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
     parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
     parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
+    parser.add_argument('--checkpoint', type=str, default-'./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt', help = 'Please choose a checkpoint file where the model parameters are stored')
 
     return parser.parse_args()
 
@@ -76,8 +77,6 @@ def main(args):
                 ## anything else to config
             }
         )
-    
-
 
     # Free memory and empty cache, and set device to use GPU
     gc.collect()
@@ -86,26 +85,74 @@ def main(args):
     device = torch.device(args.device)
     print(device)
     
-    # Load data compiled in preprocess.py and extract train, val
     print('Loading Data...')
-    print(args.dataset)
-    all_data = np.load(args.dataset, allow_pickle=True).item()
-    print(all_data.keys())
-    # input()
-    train_data_imgs = all_data['train_patched_images']
-    print(len(train_data_imgs))
-    train_data_masks = all_data['train_patched_masks']
-    print(len(train_data_masks))
+    if args.dataset = './Data/pannuke_6c.npy':
+        print(args.dataset)
+        all_data = np.load(args.dataset, allow_pickle=True).item()
+        print(all_data.keys())
+        # input()
+        train_data_imgs = all_data['train_patched_images']
+        print(len(train_data_imgs))
+        train_data_masks = all_data['train_patched_masks']
+        print(len(train_data_masks))
 
-    val_data_imgs = all_data['val_patched_images']
-    val_data_masks = all_data['val_patched_masks']
+        val_data_imgs = all_data['val_patched_images']
+        val_data_masks = all_data['val_patched_masks']
 
-    # Instantiate custom PyTorch dataset and create DataLoaders
-    train_dataset = CellDataset(train_data_imgs, train_data_masks, args)
-    val_dataset = CellDataset(val_data_imgs, val_data_masks, args)
+        # Instantiate custom PyTorch dataset and create DataLoaders
+        train_dataset = CellDataset(train_data_imgs, train_data_masks, args)
+        val_dataset = CellDataset(val_data_imgs, val_data_masks, args)
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle = True)   
-    val_loader = DataLoader(val_dataset, batch_size=args.batch, shuffle = True)
+        train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle = True)   
+        val_loader = DataLoader(val_dataset, batch_size=args.batch, shuffle = True)
+
+        pass
+
+    elif args.dataset = 'clip_dataset':
+        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+        
+        all_signals_path = './Data/Data/images/*'
+        all_texts_path = './Data/Data/texts/*'
+        
+        all_signals = sorted(glob.glob(all_signals_path)[:1727])
+        all_texts = sorted(glob.glob(all_texts_path)[:1727])
+        
+        split_idx = int(len(all_signals) * 0.8)
+        
+        train_signals = all_signals[:split_idx]
+        train_texts = all_texts[:split_idx]
+        val_signals = all_signals[split_idx:]
+        val_texts = all_texts[split_idx:]
+        
+        # Create datasets
+        train_dataset = ECGCLIPPretrain(
+            train_signals, 
+            train_texts,
+            tokenizer, 
+            processor
+        )
+        
+        val_dataset = ECGCLIPPretrain(
+            val_signals,
+            val_texts, 
+            tokenizer,
+            processor
+        )
+        
+        # Create dataloaders
+        train_loader = DataLoader(
+            train_dataset, 
+            batch_size=args.batch, 
+            shuffle=True
+        )
+        
+        val_loader = DataLoader(
+            val_dataset,
+            batch_size=args.batch,
+            shuffle=False
+        )
+
 
     # Instantiate model unet
     if args.model == 'unet':
@@ -118,9 +165,19 @@ def main(args):
         model = UVixLSTM_noAtt(class_num = 6, img_dim = 256, in_channels=3)
         model_hidden_size = 256
     elif args.model == "clip_xlstm":
-        model = clip_xlstm()
+        model = clip_xlstm(
+            checkpoint_path=args.checkpoint,
+            device=device,
+            shape2=512,
+            shape3=256,
+            class_num=6,
+            img_dim=args.patch_size,
+            in_channels=3,
+            out_channels=64,
+            depth=12,
+            dim=256
+        )
         model_hidden_size = 256
-
 
     ### ABOVE CHANGE CLASS_NUM TO 6 for 6 classes
   
