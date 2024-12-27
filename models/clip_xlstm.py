@@ -7,7 +7,7 @@ from enum import Enum
 import math
 import os
 import torch.nn.functional as F
-from vLSTM import *
+from models.vLSTM import *
 from transformers import CLIPProcessor, CLIPVisionModel, CLIPModel, CLIPTokenizer
 from PIL import Image
 import requests
@@ -346,26 +346,26 @@ batch = {
     'text': "sample text" # or path to text file
 }
 
-model = clip_xlstm(
-    checkpoint_path='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
-    device='cuda' if torch.cuda.is_available() else 'cpu',
-    shape2=512,
-    shape3=256,
-    class_num=1,
-    img_dim=256,
-    in_channels=3,
-    out_channels=64,
-    depth=12,
-    dim=256
-)
+# model = clip_xlstm(
+#     checkpoint_path='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
+#     device='cuda' if torch.cuda.is_available() else 'cpu',
+#     shape2=512,
+#     shape3=256,
+#     class_num=1,
+#     img_dim=256,
+#     in_channels=3,
+#     out_channels=64,
+#     depth=12,
+#     dim=256
+# )
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f"Using device: {device}")
+# device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# print(f"Using device: {device}")
 
-model = model.to(device)
+# model = model.to(device)
 
-output = model(batch)
-print(output.shape)
+# output = model(batch)
+# print(output.shape)
 
-output_image = Image.fromarray((output.squeeze().cpu().numpy() * 255).astype(np.uint8))
-output_image.save("test_output.png")
+# output_image = Image.fromarray((output.squeeze().cpu().numpy() * 255).astype(np.uint8))
+# output_image.save("test_output.png")

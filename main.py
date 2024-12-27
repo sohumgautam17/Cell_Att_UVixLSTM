@@ -35,12 +35,12 @@ def get_args():
     parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
     parser.add_argument('--patch_size', type=int, default=256, help='please enter patch size')
     parser.add_argument('--loss', type = str, default = 'dice', help = 'Please choose which loss to use')
-    parser.add_argument('--checkpoint', type = str, help = 'Please choose the checkpoint to use')
+    parser.add_argument('--model_checkpoint', type = str, help = 'Please choose the checkpoint to use')
     parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
     parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
     parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
     parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
-    parser.add_argument('--checkpoint', type=str, default-'./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt', help = 'Please choose a checkpoint file where the model parameters are stored')
+    parser.add_argument('--clip_checkpoint', type=str, default='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt', help = 'Please choose a checkpoint file where the model parameters are stored')
 
     return parser.parse_args()
 
@@ -86,7 +86,7 @@ def main(args):
     print(device)
     
     print('Loading Data...')
-    if args.dataset = './Data/pannuke_6c.npy':
+    if args.dataset == './Data/pannuke_6c.npy':
         print(args.dataset)
         all_data = np.load(args.dataset, allow_pickle=True).item()
         print(all_data.keys())
@@ -108,7 +108,7 @@ def main(args):
 
         pass
 
-    elif args.dataset = 'clip_dataset':
+    elif args.dataset == 'clip_dataset':
         processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
         
@@ -118,13 +118,17 @@ def main(args):
         all_signals = sorted(glob.glob(all_signals_path)[:1727])
         all_texts = sorted(glob.glob(all_texts_path)[:1727])
         
-        split_idx = int(len(all_signals) * 0.8)
+        split_idx_1 = int(len(all_signals) * 0.75)
+        split_idx_2 = int(len(all_signals) * 0.90)
+
         
-        train_signals = all_signals[:split_idx]
-        train_texts = all_texts[:split_idx]
-        val_signals = all_signals[split_idx:]
-        val_texts = all_texts[split_idx:]
-        
+        train_signals = all_signals[:split_idx_1]
+        train_texts = all_texts[:split_idx_1]
+        val_signals = all_signals[split_idx_1:split_idx_2]
+        val_texts = all_texts[split_idx_1:split_idx_2]
+        test_signals = all_signals[split_idx_2:]
+        test_texts = all_texts[split_idx_2:]
+
         # Create datasets
         train_dataset = ECGCLIPPretrain(
             train_signals, 
@@ -140,6 +144,12 @@ def main(args):
             processor
         )
         
+        test_datasets = ECGCLIPPretrain(
+            test_signals, 
+            test_texts,
+            tokenizer,
+            processor
+        )
         # Create dataloaders
         train_loader = DataLoader(
             train_dataset, 
@@ -149,6 +159,12 @@ def main(args):
         
         val_loader = DataLoader(
             val_dataset,
+            batch_size=args.batch,
+            shuffle=False
+        )
+
+        test_dataloader = DataLoader(
+            test_dataset, 
             batch_size=args.batch,
             shuffle=False
         )
@@ -166,7 +182,7 @@ def main(args):
         model_hidden_size = 256
     elif args.model == "clip_xlstm":
         model = clip_xlstm(
-            checkpoint_path=args.checkpoint,
+            checkpoint_path=args.clip_checkpoint,
             device=device,
             shape2=512,
             shape3=256,
@@ -186,19 +202,21 @@ def main(args):
     
     # If in Dev Mode Inference Mode OFF, else inference on test dataset
     if args.inference:
-        test_data_imgs = all_data['test_patched_images']
-        test_data_masks = all_data['test_patched_masks']
-        test_dataset = CellDataset(test_data_imgs, test_data_masks, args)
-        test_loader = DataLoader(test_dataset, batch_size=1, shuffle = False)
+        if args.dataset != 'clip_dataset':
+            test_data_imgs = all_data['test_patched_images']
+            test_data_masks = all_data['test_patched_masks']
+            test_dataset = CellDataset(test_data_imgs, test_data_masks, args)
+            test_loader = DataLoader(test_dataset, batch_size=1, shuffle = False)
 
-        # Load saved weights from trained model and inference
-        checkpoint = torch.load(f'./runs/checkpoint/{args.checkpoint}/best_checkpoint.chkpt', map_location = args.device)
-        model.load_state_dict(checkpoint['model'])
-        tester(model, test_loader, device, args)
-        # inference_watershed(model, test_loader, device, args)
-
-
-        # This is where Watershed is run
+            # Load saved weights from trained model and inference
+            checkpoint = torch.load(f'./runs/checkpoint/{args.model_checkpoint}/best_checkpoint.chkpt', map_location = args.device)
+            model.load_state_dict(checkpoint['model'])
+            tester(model, test_loader, device, args)
+            # inference_watershed(model, test_loader, device, args)
+        else:
+            checkpoint = torch.load(f'./runs/checkpoint/{args.model_checkpoint}/best_checkpoint.chkpt', map_location = args.device)
+            model.load_state_dict(checkpoint['model'])
+            tester(model, test_loader, device, args)
 
     else:
         

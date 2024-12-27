@@ -36,7 +36,6 @@ def encode_image(image_path):
         return None
 
 def forward(img_path):
-
     messages = [
     {"role": "system", 
         "content": initial_prompt}]

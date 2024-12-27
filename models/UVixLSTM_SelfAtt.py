@@ -8,6 +8,8 @@ import math
 import torch.nn.functional as F
 from models.vLSTM import *
 from models.model_utils import *
+from torchsummary import summary
+# from models.clip import CLIPModel
 
 class EncoderBottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, base_width=64):
@@ -152,13 +154,14 @@ class Encoder(nn.Module):
         x = einops.rearrange(x, "b ... d -> b (...) d")
         # print(x.size())
 
+        print(f'Shape before xLSTM: {x.shape}')
         for block in self.blocks:
             x = block(x)
         x = self.legacy_norm(x)
         x = self.norm(x) # torch.Size([1, 9, 256])
         # print(x.shape)
         x = rearrange(x, "b (x y) c -> b c x y", x=self.output_shape[0], y=self.output_shape[0])
-        # print(x.shape)
+        print(f'Output of the xLSTM (x) shape is {x.shape}')
         # input()
         return x, x1, x2, x3
 
@@ -178,19 +181,6 @@ class DecoderBottleneck(nn.Module):
             nn.ReLU(inplace=True)
         )
 
-    # def forward(self, x, x_concat=None):
-    #     print(x.shape, x_concat.shape)
-    #     print('----')
-    #     if x.shape[2] == 3:
-    #         x = self.upsample1(x)
-    #     else:
-    #         x = self.upsample(x)
-    #     print(x.size(), x_concat.size())
-    #     if x_concat is not None:
-    #         x = torch.cat([x_concat, x], dim=1)
-
-    #     x = self.layer(x)
-    #     return x
     def forward(self, x, x_concat=None):
         # print(x.size(), x_concat.size() if x_concat is not None else None)
         
@@ -221,6 +211,7 @@ class Decoder(nn.Module):
 
 
     def forward(self, x, x1, x2, x3):
+
 
         x = self.decoder1(x, x3)
         # print(f'shape after decoder 1: {x.shape}')
@@ -259,7 +250,7 @@ class UVixLSTM_noAtt(nn.Module):
     def forward(self, x):
         x, x1, x2, x3 = self.encoder(x)
         # put the multihead slef attention layer here 
-
+        print(f'This should be the same shape as xLSTM (x) output: {x.shape}')
         # x = self.MHSA(x)
     
 
