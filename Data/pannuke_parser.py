@@ -1,7 +1,7 @@
 import time 
 import glob
 import argparse
-from process_data import load_cryo, resize_cryo, load_pannuke
+from process_data import load_pannuke
 from augmentations import apply_aug
 import matplotlib.patches as mpatches
 from matplotlib.legend import Legend
@@ -75,7 +75,21 @@ def main():
     print(len(data['val_patched_images']))
     print(len(data['test_patched_images']))
 
-    def save_images_and_masks(data, gpt_load=bool):
+    def xlstm_load(data):
+        ensure_directory_exists('./Data/images_npy/')
+        ensure_directory_exists('./Data/masks_npy/')
+        for idx, (image, mask) in enumerate(zip(data['all_images'], data['all_masks'])):
+            image_path = f'./Data/images_npy/image_{idx}'
+            mask_path = f'./Data/masks_npy/mask_{idx}'
+
+            np.save(image_path, image)
+            np.save(mask_path, mask)
+            print('Done loading')
+            # input()
+        
+        return None
+
+    def clip_load(data, gpt_load=bool):
         if gpt_load:
             print("Saving images, masks, and generating text files...")
             ensure_directory_exists('./Data/masks/')
@@ -159,8 +173,9 @@ def main():
 
     end_time = time.process_time()
     print(float(end_time-start_time))
-    save_images_and_masks(data, gpt_load=False)
-    np.save('./pannuke_6c', data)
+    xlstm_load(data)
+    # clip_load(data, gpt_load=False)
+    # np.save('./pannuke_6c', data)
 
 if __name__ == "__main__":
     print('Preprocessing Data...')
