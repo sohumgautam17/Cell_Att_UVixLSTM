@@ -10,6 +10,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from segmentation_models_pytorch.losses import DiceLoss
+from transformers import CLIPProcessor, CLIPVisionModel, CLIPModel, CLIPTokenizer
+import glob
 import wandb
 
 from models.UVixLSTM_GateAtt import UVixLSTM_Att
@@ -19,7 +21,7 @@ from add_losses import FocalLoss, JaccardLoss
 
 from optim import ScheduledOptim, early_stopping
 from runners import trainer, validater, tester
-from dataloader import CellDataset
+from dataloader import CellDataset, ECGCLIPPretrain, CLIPCellDataset
 
 
 def get_args():
@@ -30,7 +32,7 @@ def get_args():
     parser.add_argument('--dataset', type = str, default = './Data/pannuke_6c.npy', help = 'Please choose a dataset' )
     parser.add_argument('--warmup', type = int, default = 2000, help = 'Please choose the number of warmup steps for the optimizer' )
     parser.add_argument('--epochs', type = int, default = 100, help = 'Please choose the number of epochs' )
-    parser.add_argument('--batch', type = int, default = 8, help = 'Please choose the batch size')
+    parser.add_argument('--batch', type = int, default = 32, help = 'Please choose the batch size')
     parser.add_argument('--weight_decay', type = float, default = 1e-2, help = 'Please choose the weight decay')
     parser.add_argument('--model', type = str, default = 'unet', help = 'Please choose which model to use')
     parser.add_argument('--patch_size', type=int, default=256, help='please enter patch size')
@@ -39,7 +41,6 @@ def get_args():
     parser.add_argument('--inference', action='store_true', help = 'Please choose whether it is inference or not')
     parser.add_argument('--log', action='store_true', help = 'Please choose whether to log or not')
     parser.add_argument('--dev', action='store_true', help = 'Please choose whether to be in dev mode or not')
-    parser.add_argument('--augfly', action='store_true', help = 'Please choose whether to do augmentations of the fly, or at the start in preprocess.py')
     parser.add_argument('--clip_checkpoint', type=str, default='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt', help = 'Please choose a checkpoint file where the model parameters are stored')
 
     return parser.parse_args()
@@ -111,64 +112,26 @@ def main(args):
     elif args.dataset == 'clip_dataset':
         processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
-        
-        all_signals_path = './Data/Data/images/*'
-        all_texts_path = './Data/Data/texts/*'
-        
-        all_signals = sorted(glob.glob(all_signals_path)[:1727])
-        all_texts = sorted(glob.glob(all_texts_path)[:1727])
-        
-        split_idx_1 = int(len(all_signals) * 0.75)
-        split_idx_2 = int(len(all_signals) * 0.90)
 
-        
-        train_signals = all_signals[:split_idx_1]
-        train_texts = all_texts[:split_idx_1]
-        val_signals = all_signals[split_idx_1:split_idx_2]
-        val_texts = all_texts[split_idx_1:split_idx_2]
-        test_signals = all_signals[split_idx_2:]
-        test_texts = all_texts[split_idx_2:]
+        image_path = sorted(glob.glob('./Data/Data/images/*'))
+        text_path = sorted(glob.glob('./Data/Data/texts/*'))
+        image_npy = sorted(glob.glob('./Data/Data/images_npy/*'))
+        mask_npy = sorted(glob.glob('./Data/Data/masks_npy/*'))
 
-        # Create datasets
-        train_dataset = ECGCLIPPretrain(
-            train_signals, 
-            train_texts,
-            tokenizer, 
-            processor
-        )
-        
-        val_dataset = ECGCLIPPretrain(
-            val_signals,
-            val_texts, 
-            tokenizer,
-            processor
-        )
-        
-        test_datasets = ECGCLIPPretrain(
-            test_signals, 
-            test_texts,
-            tokenizer,
-            processor
-        )
-        # Create dataloaders
-        train_loader = DataLoader(
-            train_dataset, 
-            batch_size=args.batch, 
-            shuffle=True
-        )
-        
-        val_loader = DataLoader(
-            val_dataset,
-            batch_size=args.batch,
-            shuffle=False
-        )
 
-        test_dataloader = DataLoader(
-            test_dataset, 
-            batch_size=args.batch,
-            shuffle=False
-        )
+        train_slice = int(len(image_path) * 0.75)
+        val_slice = int((len(image_path) * 0.90))
 
+        train_dataset = CLIPCellDataset(image_path[:train_slice], text_path[:train_slice], image_npy[:train_slice], mask_npy[:train_slice],
+                                        tokenizer, processor)
+        val_dataset = CLIPCellDataset(image_path[train_slice:val_slice], text_path[train_slice:val_slice], image_npy[train_slice:val_slice], mask_npy[train_slice:val_slice],
+                                        tokenizer, processor)
+        test_dataset = CLIPCellDataset(image_path[val_slice:], text_path[val_slice:], image_npy[val_slice:], mask_npy[val_slice:],
+                                        tokenizer, processor)
+
+        train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle = True)   
+        val_loader = DataLoader(val_dataset, batch_size=args.batch, shuffle = False)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch, shuffle = False)
 
     # Instantiate model unet
     if args.model == 'unet':
@@ -195,6 +158,7 @@ def main(args):
         )
         model_hidden_size = 256
 
+
     ### ABOVE CHANGE CLASS_NUM TO 6 for 6 classes
   
 
@@ -220,26 +184,13 @@ def main(args):
 
     else:
         
-        directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}_{args.augfly}_{args.loss}'
+        directory_path = f'./runs/checkpoint/saved_best_{args.lr}_{args.batch}_{args.patience}_{args.weight_decay}_{args.model}_{args.loss}'
         ensure_directory_exists(directory_path)
         
         # Continue in Dev Mode
         optimizer = ScheduledOptim(
         Adam(filter(lambda x: x.requires_grad, model.parameters()),
             betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)
-        '''
-        optimizer = Adam(
-                        filter(lambda x: x.requires_grad, model.parameters()), 
-                        lr=args.lr, 
-                        betas=(0.9, 0.98), 
-                        eps=1e-4, 
-                        weight_decay=args.weight_decay
-                    )
-        '''
-        
-        '''ScheduledOptim(
-        Adam(filter(lambda x: x.requires_grad, model.parameters()),
-            betas=(0.9, 0.98), eps=1e-4, lr = args.lr, weight_decay=args.weight_decay), model_hidden_size, args.warmup)'''
         
         if args.loss == 'dice':
             dc_loss = DiceLoss(mode='mutliclass')
@@ -253,8 +204,8 @@ def main(args):
             focal_loss = None
         elif args.loss == 'all':
             # bce_loss = torch.nn.BCEWithLogitsLoss()
-            bce_loss = torch.nn.CrossEntropyLoss()
-            dc_loss = DiceLoss(mode='multilabel')
+            bce_loss = torch.nn.CrossEntropyLoss() 
+            dc_loss = DiceLoss(mode='multiclass')
             jaccard_loss = JaccardLoss()
             focal_loss = FocalLoss()
 

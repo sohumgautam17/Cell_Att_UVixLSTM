@@ -177,26 +177,24 @@ from concurrent.futures import ThreadPoolExecutor
 def load_pannuke(subset_size=None):
     images_fold_1 = '/mnt/data2/sohum/datasets/panuke/Fold_1/images/fold1/images.npy'
     images_1 = np.load(images_fold_1, mmap_mode='r')
-    print('...')
-    # images_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/images.npy'
-    # images_2 = np.load(images_fold_2, mmap_mode='r')
-    # print('...')
-    # all_images = np.concatenate((images_1, images_2), axis=0)  # Concatenate along the first dimension
-    # all_images = (all_images).astype(np.uint8)
+    images_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/images.npy'
+    images_2 = np.load(images_fold_2, mmap_mode='r')
+    all_images = np.concatenate((images_1, images_2), axis=0)  # Concatenate along the first dimension
+    all_images = (all_images).astype(np.uint8)
 
-    # print("Images shape:", all_images.shape)
-    # print("Images dtype:", all_images.dtype)
+    print("Images shape:", all_images.shape)
+    print("Images dtype:", all_images.dtype)
 
     mask_fold_1 = '/mnt/data2/sohum/datasets/panuke/Fold_1/masks/fold1/masks.npy'
     masks_1 = np.load(mask_fold_1, mmap_mode='r')
-    print('...')
-    # mask_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/masks.npy'
-    # masks_2 = np.load(mask_fold_2, mmap_mode='r')
-    # print('...')
-    # print('Done loading dataset')
-    # all_masks = np.concatenate((masks_1, masks_2), axis=0)  # Concatenate along the first dimension
-    # print("Masks shape:", all_masks.shape)
-    # print("Masks dtype:", all_masks.dtype)
+    mask_fold_2 = '/mnt/data2/sohum/datasets/panuke/Fold_2/masks.npy'
+    masks_2 = np.load(mask_fold_2, mmap_mode='r')
+    print('Done loading dataset')
+    all_masks = np.concatenate((masks_1, masks_2), axis=0)  # Concatenate along the first dimension
+    print("Masks shape:", all_masks.shape)
+    print("Masks dtype:", all_masks.dtype)
+
+    input('Validate shapes and continue')
 
     def overlap_mask(all_masks):
         if all_masks.ndim != 4:
@@ -228,13 +226,13 @@ def load_pannuke(subset_size=None):
         print(f"Shape of combined_mask: {new_masks.shape}")
         return new_masks
 
-    overlapped_masks = overlap_mask(masks_1) # changed from all_masks
+    overlapped_masks = overlap_mask(all_masks) # changed from all_masks
     # zero_mask_indices = np.where(overlapped_masks == 0)
     # assert np.all(overlapped_masks != 0)
 
     print(f'overlapped_masks :{np.unique(overlapped_masks)}')
     print("Shape of overlapped:", overlapped_masks.shape)
     
-    return images_1, overlapped_masks
+    return all_images, overlapped_masks
 
 

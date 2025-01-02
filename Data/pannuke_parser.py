@@ -44,36 +44,36 @@ def main():
     print("Length of mask_list:", len(data['mask']))
     print("Shape of first element in mask_list:", data['mask'][0].shape)
     
-    # aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
+    aug_images, aug_masks = apply_aug(data['original_image'], data['mask'])
 
-    # print(f'length of aug_images: {len(aug_images)}')
+    print(f'Length of total augmented data: {len(aug_images)}')
 
-    # data['aug_images'].extend(aug_images) # data['original_image'] 
-    # data['aug_masks'].extend(aug_masks) # data['mask'] 
+    data['aug_images'].extend(aug_images) # data['original_image'] 
+    data['aug_masks'].extend(aug_masks) # data['mask'] 
     data['all_images'].extend(data['aug_images'])
     data['all_images'].extend(data['original_image'])
     data['all_masks'].extend(data['aug_masks'])
     data['all_masks'].extend(data['mask'])
 
-    # print(f'Length of all images : {len(data['all_images'])}')
+    print(f'Length of all images: {len(data["all_images"])}')
 
-    total_patch_images = len(data['all_masks'])
-    print(total_patch_images)
-    train_cutoff = int(0.85 * total_patch_images)
-    print(f'train_cutoff: {train_cutoff}')
-    val_cutoff = int(0.93 * total_patch_images)
-    print(f'validation_cutoff: {val_cutoff}')
+    # total_patch_images = len(data['all_masks'])
+    # print(total_patch_images)
+    # train_cutoff = int(0.85 * total_patch_images)
+    # print(f'train_cutoff: {train_cutoff}')
+    # val_cutoff = int(0.93 * total_patch_images)
+    # print(f'validation_cutoff: {val_cutoff}')
     
-    data['train_patched_images'] = data['all_images'][:train_cutoff]
-    data['train_patched_masks'] = data['all_masks'][:train_cutoff]
-    data['val_patched_images'] = data['all_images'][train_cutoff:val_cutoff] 
-    data['val_patched_masks'] = data['all_masks'][train_cutoff:val_cutoff] 
-    data['test_patched_images'] = data['all_images'][val_cutoff:]
-    data['test_patched_masks'] = data['all_masks'][val_cutoff:] 
+    # data['train_patched_images'] = data['all_images'][:train_cutoff]
+    # data['train_patched_masks'] = data['all_masks'][:train_cutoff]
+    # data['val_patched_images'] = data['all_images'][train_cutoff:val_cutoff] 
+    # data['val_patched_masks'] = data['all_masks'][train_cutoff:val_cutoff] 
+    # data['test_patched_images'] = data['all_images'][val_cutoff:]
+    # data['test_patched_masks'] = data['all_masks'][val_cutoff:] 
 
-    print(len(data['train_patched_images']))
-    print(len(data['val_patched_images']))
-    print(len(data['test_patched_images']))
+    # print(len(data['train_patched_images']))
+    # print(len(data['val_patched_images']))
+    # print(len(data['test_patched_images']))
 
     def xlstm_load(data):
         ensure_directory_exists('./Data/images_npy/')
@@ -84,7 +84,6 @@ def main():
 
             np.save(image_path, image)
             np.save(mask_path, mask)
-            print('Done loading')
             # input()
         
         return None
@@ -122,7 +121,7 @@ def main():
                     (0, 0, 255),       # Class 3 - Blue
                     (255, 255, 0),     # Class 4 - Yellow
                 ]
-                # ----------------------------
+
                 squeezed_mask = mask.squeeze(-1)
                 colored_mask = np.zeros((*squeezed_mask.shape, 3), dtype=np.uint8)
                 for num in range(6):
@@ -174,7 +173,7 @@ def main():
     end_time = time.process_time()
     print(float(end_time-start_time))
     xlstm_load(data)
-    # clip_load(data, gpt_load=False)
+    clip_load(data, gpt_load=True)
     # np.save('./pannuke_6c', data)
 
 if __name__ == "__main__":

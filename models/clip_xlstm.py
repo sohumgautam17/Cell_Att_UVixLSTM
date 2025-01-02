@@ -51,41 +51,41 @@ class clip_encoder(nn.Module):
         freeze_clip_weights(model)
 
         # Handle image input
-        if isinstance(x['image'], str):  # If it's a file path
-            signal_image = Image.open(x['image']).convert("RGB")
-        else:  # If it's a tensor
-            # Convert tensor to PIL Image
-            # Assuming input tensor is in shape [B, C, H, W] and normalized
-            image_tensor = x['image'].squeeze(0)  # Remove batch dimension
-            # Denormalize if your tensor is normalized
-            image_tensor = (image_tensor * 255).clamp(0, 255).byte()
-            image_tensor = image_tensor.permute(1, 2, 0).cpu().numpy()  # Change to [H, W, C]
-            signal_image = Image.fromarray(image_tensor)
+        # if isinstance(x['pixel_values'], str):  # If it's a file path
+        #     signal_image = Image.open(x['pixel_values']).convert("RGB")
+        # else:  # If it's a tensor
+        #     # Convert tensor to PIL Image
+        #     # Assuming input tensor is in shape [B, C, H, W] and normalized
+        #     image_tensor = x['pixel_values'].squeeze(0)  # Remove batch dimension
+        #     # Denormalize if your tensor is normalized
+        #     image_tensor = (image_tensor * 255).clamp(0, 255).byte()
+        #     image_tensor = image_tensor.permute(1, 2, 0).cpu().numpy()  # Change to [H, W, C]
+        #     signal_image = Image.fromarray(image_tensor)
 
-        # Handle text input
-        if isinstance(x['text'], str):
-            if os.path.isfile(x['text']):  # If it's a file path
-                with open(x['text'], 'r') as f:
-                    text = f.read().strip()
-            else:  # If it's a direct text string
-                text = x['text']
-        else:
-            raise ValueError("Text input must be a string or file path")
+        # # Handle text input
+        # if isinstance(x['input_ids'], str):
+        #     if os.path.isfile(x['text']):  # If it's a file path
+        #         with open(x['input_ids'], 'r') as f:
+        #             text = f.read().strip()
+        #     else:  # If it's a direct text string
+        #         text = x['input_ids']
+        # else:
+        #     raise ValueError("Text input must be a string or file path")
 
         # Process inputs
-        processor = self.processor
-        inputs_text = processor(text=text, return_tensors="pt", padding='max_length', 
-                            truncation=True, max_length=77)
-        inputs_image = processor(images=signal_image, return_tensors="pt")
+        # processor = self.processor
+        # inputs_text = processor(text=text, return_tensors="pt", padding='max_length', 
+                            # truncation=True, max_length=77)
+        # inputs_image = processor(images=signal_image, return_tensors="pt")
 
         inputs = {
-            'input_ids': inputs_text.input_ids.to(self.device),
-            'pixel_values': inputs_image.pixel_values.to(self.device)
+            'input_ids': x['input_ids'].to(self.device),
+            'pixel_values': x['pixel_values'].to(self.device)
         }
 
         with torch.no_grad():
             outputs = model(**inputs)
-            print(outputs.keys())
+            # print(outputs.keys())
             return outputs['image_embeds']  # (1, 512)
 
 
@@ -225,13 +225,13 @@ class Encoder(nn.Module):
         x = self.patch_embed(x)
         x = einops.rearrange(x, "b ... d -> b (...) d")
 
-        print(f'Shape before xLSTM: {x.shape}')
+        # print(f'Shape before xLSTM: {x.shape}')
         for block in self.blocks:
             x = block(x)
         x = self.legacy_norm(x)
         x = self.norm(x) # torch.Size([1, 9, 256])
         x = rearrange(x, "b (x y) c -> b c x y", x=self.output_shape[0], y=self.output_shape[0])
-        print(f'Output of the xLSTM (x) shape is {x.shape}')
+        # print(f'Output of the xLSTM (x) shape is {x.shape}')
         return x, x1, x2, x3
 
 class DecoderBottleneck(nn.Module):
@@ -290,7 +290,7 @@ class Decoder(nn.Module):
 
 class clip_xlstm(nn.Module):
     def __init__(self, checkpoint_path, device, shape2=512, shape3=256, 
-                class_num=1, img_dim=256, in_channels=3,
+                class_num=6, img_dim=256, in_channels=3,
                 out_channels=64, depth=12, dim=256):
         super().__init__()
         self.device = device
@@ -312,60 +312,87 @@ class clip_xlstm(nn.Module):
             nn.Linear(shape2, shape3)
         ).to(device)
         
-        self.decoder = Decoder(out_channels=64, class_num=1).to(device)
+        self.decoder = Decoder(out_channels=64, class_num=6).to(device)
 
-    def fuse_clip_xlstm(self, batch):
+    def fuse_clip_xlstm(self, batch): # batch holds model_inputs = (clip_input, xlstm_img)
         with torch.no_grad():
-            if torch.is_tensor(batch['image']):
-                batch['image'] = batch['image'].to(self.device)
-            
-            clip_output = self.clip(batch)
+            clip_output = self.clip(batch['clip_data'])
             proj_clip_out = self.clip_projection(clip_output)
 
-            xlstm_output, x1, x2, x3 = self.encoder(batch['image'])
-            
-            B, C, H, W = xlstm_output.shape
-            xlstm_flat = xlstm_output.view(B, C, -1).mean(-1)
-            proj_xlstm_out = self.xlstm_projection(xlstm_flat)
+        xlstm_output, x1, x2, x3 = self.encoder(batch['xlstm_image'])
+        
+        B, C, H, W = xlstm_output.shape
+        xlstm_flat = xlstm_output.view(B, C, -1).mean(-1)
+        proj_xlstm_out = self.xlstm_projection(xlstm_flat)
 
-            combined_out = torch.cat([proj_clip_out, proj_xlstm_out], dim=1)
-            fused_out = self.fusion_layer(combined_out)
+        combined_out = torch.cat([proj_clip_out, proj_xlstm_out], dim=1)
+        fused_out = self.fusion_layer(combined_out)
 
-            x1, x2, x3 = x1.to(self.device), x2.to(self.device), x3.to(self.device)
-            x = self.decoder(fused_out.unsqueeze(-1).unsqueeze(-1), x1, x2, x3)
+        x1, x2, x3 = x1.to(self.device), x2.to(self.device), x3.to(self.device)
+        x = self.decoder(fused_out.unsqueeze(-1).unsqueeze(-1), x1, x2, x3)
 
         return x
 
     def forward(self, batch):
-        fused_out = self.fuse_clip_xlstm(batch)
+        fused_out = self.fuse_clip_xlstm(batch) # this holds clip_data, xlstm_image
         return fused_out
 
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # print(f"Using device: {device}")
 
-batch = {
-    'image': torch.randn(1, 3, 256, 256),  # or path to image
-    'text': "sample text" # or path to text file
-}
+    # # Create sample batch with proper structure
+    # xlstm_image = torch.randn(1, 3, 256, 256)  # [B, C, H, W]
+    
+    # # Create CLIP inputs
+    # clip_inputs = {
+    #     'input_ids': torch.randint(0, 1000, (1, 77)),  # Example token IDs
+    #     'attention_mask': torch.ones(1, 77),  # Example attention mask
+    #     'pixel_values': torch.randn(1, 3, 224, 224),  # CLIP expects 224x224 images
+    # }
 
-# model = clip_xlstm(
-#     checkpoint_path='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
-#     device='cuda' if torch.cuda.is_available() else 'cpu',
-#     shape2=512,
-#     shape3=256,
-#     class_num=1,
-#     img_dim=256,
-#     in_channels=3,
-#     out_channels=64,
-#     depth=12,
-#     dim=256
-# )
+    # # Create model inputs dictionary
+    # model_inputs = {
+    #     'clip_data': {
+    #         'image': xlstm_image,  # Image for CLIP
+    #         'text': "This is a sample text for testing"  # Text for CLIP
+    #     },
+    #     'xlstm_image': xlstm_image  # Image for xLSTM
+    # }
 
-# device = 'cuda' if torch.cuda.is_available() else 'cpu'
-# print(f"Using device: {device}")
-
-# model = model.to(device)
-
-# output = model(batch)
-# print(output.shape)
-
-# output_image = Image.fromarray((output.squeeze().cpu().numpy() * 255).astype(np.uint8))
-# output_image.save("test_output.png")
+    # # Initialize model
+    # model = clip_xlstm(
+    #     checkpoint_path='./runs/checkpoint/best_clip_pretrain_checkpoint.pt/best_checkpoint.chkpt',
+    #     device=device,
+    #     shape2=512,
+    #     shape3=256,
+    #     class_num=1,
+    #     img_dim=256,
+    #     in_channels=3,
+    #     out_channels=64,
+    #     depth=12,
+    #     dim=256
+    # )
+    
+    # # Move model to device
+    # model = model.to(device)
+    
+    # # Move inputs to device
+    # model_inputs['xlstm_image'] = model_inputs['xlstm_image'].to(device)
+    
+    # # Print model summary
+    # print_model_summary(model)
+    
+    # # Forward pass
+    # print("\nPerforming forward pass...")
+    # with torch.no_grad():
+    #     output = model(model_inputs)
+    
+    # print(f"\nOutput shape: {output.shape}")
+    
+    # # Save sample output
+    # if output.shape[1] == 1:  # If single channel output
+    #     output_np = output.squeeze().cpu().numpy()
+    #     output_np = (output_np * 255).clip(0, 255).astype(np.uint8)
+    #     output_image = Image.fromarray(output_np)
+    #     output_image.save("test_output.png")
+    #     print("\nSaved output image as 'test_output.png'")
